@@ -104,7 +104,7 @@ export function CategoriaSelect({
       </Popover.Trigger>
 
       <Popover.Portal>
-        <Popover.Positioner side="bottom" sideOffset={4} alignment="start" className="z-50">
+        <Popover.Positioner side="bottom" sideOffset={4} align="start" className="z-50">
           <Popover.Popup
             className="w-(--anchor-width) min-w-[200px] rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 origin-(--transform-origin) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
           >
