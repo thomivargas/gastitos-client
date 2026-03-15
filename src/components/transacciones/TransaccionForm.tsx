@@ -21,6 +21,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
+import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { Badge } from '@/components/ui/badge'
 import { X } from 'lucide-react'
 import { useCuentas } from '@/hooks/use-cuentas'
@@ -81,10 +82,7 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
   const { data: categorias } = useCategorias(clasificacion)
   const { data: etiquetas } = useEtiquetas()
 
-  const categoriasFlat = (categorias || []).flatMap((cat) => [
-    cat,
-    ...(cat.subcategorias || []),
-  ])
+  const categoriasLista = categorias || []
 
   useEffect(() => {
     if (!open) return
@@ -206,22 +204,12 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
             </div>
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={categoriaId || null} onValueChange={(v) => setValue('categoriaId', v === '_none' ? '' : (v || ''))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sin categoria">
-                    {(value: string) => {
-                      if (!value || value === '_none') return 'Sin categoria'
-                      return categoriasFlat.find((x) => x.id === value)?.nombre ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">Sin categoria</SelectItem>
-                  {categoriasFlat.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CategoriaSelect
+                categorias={categoriasLista}
+                value={categoriaId}
+                onValueChange={(v) => setValue('categoriaId', v === '_none' ? '' : v)}
+                allowNone
+              />
             </div>
           </div>
 

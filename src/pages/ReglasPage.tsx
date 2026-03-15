@@ -18,13 +18,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
+import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { useReglas, useCrearRegla, useEliminarRegla, useAplicarReglas } from '@/hooks/use-reglas'
 import { useCategorias } from '@/hooks/use-categorias'
 
@@ -175,19 +169,11 @@ function ReglaFormDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={categoriaId || null} onValueChange={(v) => v && setValue('categoriaId', v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar">
-                    {(value: string) => {
-                      if (!value) return 'Seleccionar'
-                      return categorias.find((x) => x.id === value)?.nombre ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {categorias.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <CategoriaSelect
+                categorias={categorias}
+                value={categoriaId}
+                onValueChange={(v) => v && setValue('categoriaId', v)}
+              />
               {errors.categoriaId && <p className="text-xs text-destructive">{errors.categoriaId.message}</p>}
             </div>
             <div className="space-y-2">

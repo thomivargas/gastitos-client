@@ -9,6 +9,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
+import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { useCuentas } from '@/hooks/use-cuentas'
 import { useCategorias } from '@/hooks/use-categorias'
 import type { ListaTransaccionesParams } from '@/api/transacciones.api'
@@ -110,25 +111,16 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
         </Select>
 
         {/* Categoria */}
-        <Select
-          value={filtros.categoriaId ?? null}
-          onValueChange={(v) => update({ categoriaId: v === '_all' ? undefined : v ?? undefined })}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Todas las categorias">
-              {(value: string) => {
-                if (!value || value === '_all') return 'Todas las categorias'
-                return categorias.find((x) => x.id === value)?.nombre ?? value
-              }}
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="_all">Todas las categorias</SelectItem>
-            {categorias.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="w-[180px]">
+          <CategoriaSelect
+            categorias={categorias}
+            value={filtros.categoriaId}
+            onValueChange={(v) => update({ categoriaId: v === '_none' ? undefined : v || undefined })}
+            placeholder="Todas las categorias"
+            allowNone
+            noneLabel="Todas las categorias"
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-3 items-center">

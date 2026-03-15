@@ -17,13 +17,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog'
-import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from '@/components/ui/select'
+import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { PresupuestoProgreso } from '@/components/presupuestos/PresupuestoProgreso'
 import { usePresupuesto, useAsignarCategoria, useEliminarCategoriaPresupuesto } from '@/hooks/use-presupuestos'
 import { useCategorias } from '@/hooks/use-categorias'
@@ -188,21 +182,11 @@ function AsignarCategoriaDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={categoriaId || null} onValueChange={(v) => v && setValue('categoriaId', v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar categoria">
-                    {(value: string) => {
-                      if (!value) return 'Seleccionar categoria'
-                      return disponibles.find((x) => x.id === value)?.nombre ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {disponibles.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <CategoriaSelect
+                categorias={disponibles}
+                value={categoriaId}
+                onValueChange={(v) => v && setValue('categoriaId', v)}
+              />
               {errors.categoriaId && <p className="text-xs text-destructive">{errors.categoriaId.message}</p>}
             </div>
             <div className="space-y-2">

@@ -25,6 +25,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select'
+import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { EmptyState } from '@/components/EmptyState'
 import { useRecurrentes, useCrearRecurrente, useActivarRecurrente, useDesactivarRecurrente, useEliminarRecurrente } from '@/hooks/use-recurrentes'
 import { useCuentas } from '@/hooks/use-cuentas'
@@ -290,20 +291,12 @@ function RecurrenteFormDialog({ open, onOpenChange }: { open: boolean; onOpenCha
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Categoria</Label>
-              <Select value={categoriaId || null} onValueChange={(v) => setValue('categoriaId', v === '_none' ? '' : (v || ''))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sin categoria">
-                    {(value: string) => {
-                      if (!value || value === '_none') return 'Sin categoria'
-                      return categorias.find((x) => x.id === value)?.nombre ?? value
-                    }}
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="_none">Sin categoria</SelectItem>
-                  {categorias.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <CategoriaSelect
+                categorias={categorias}
+                value={categoriaId}
+                onValueChange={(v) => setValue('categoriaId', v === '_none' ? '' : v)}
+                allowNone
+              />
             </div>
             <div className="space-y-2">
               <Label>Proxima fecha</Label>
