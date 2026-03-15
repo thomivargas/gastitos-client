@@ -33,8 +33,8 @@ export function formatFechaCorta(fecha: string): string {
 }
 
 /**
- * Formatea un porcentaje: 0.642 → "64%"
+ * Formatea un porcentaje: 64.2 → "64%"
  */
 export function formatPorcentaje(valor: number): string {
-  return `${Math.round(valor * 100)}%`
+  return `${Math.round(valor)}%`
 }

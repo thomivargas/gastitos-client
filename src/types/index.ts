@@ -127,14 +127,6 @@ export interface ReglaCategorizacion {
   categoria: { id: string; nombre: string; color: string; icono: string; clasificacion: ClasificacionCategoria }
 }
 
-export interface Sesion {
-  id: string
-  ipAddress: string | null
-  userAgent: string | null
-  creadoEl: string
-  expiraEl: string
-}
-
 export interface TasaCambio {
   tipo: string
   monedaOrigen: string
@@ -168,31 +160,3 @@ export interface PaginatedResponse<T> {
 
 // ─── Reportes ───────────────────────────────────────────
 
-export interface ResumenMensual {
-  mes: string
-  ingresos: number
-  gastos: number
-  balance: number
-}
-
-export interface GastoPorCategoria {
-  categoriaId: string
-  nombre: string
-  color: string
-  icono: string
-  total: number
-  porcentaje: number
-}
-
-export interface TendenciaMensual {
-  mes: string
-  ingresos: number
-  gastos: number
-}
-
-export interface ResumenCuentas {
-  totalActivos: number
-  totalPasivos: number
-  patrimonio: number
-  cuentas: Array<Cuenta & { balanceConvertido?: number }>
-}
