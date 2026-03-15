@@ -7,11 +7,15 @@ import { extractApiError } from '@/lib/utils'
 
 // ─── Cache helpers (paginado) ────────────────────────────
 
+function esPaginado(data: unknown): data is PaginatedResponse<Cuenta> {
+  return !!data && typeof data === 'object' && 'meta' in data && Array.isArray((data as any).data)
+}
+
 function agregarEnCache(qc: QueryClient, item: Cuenta) {
   qc.setQueriesData<PaginatedResponse<Cuenta>>(
     { queryKey: ['cuentas'], exact: false },
     (old) => {
-      if (!old) return old
+      if (!esPaginado(old)) return old
       return {
         ...old,
         data: [item, ...old.data],
@@ -25,7 +29,7 @@ function actualizarEnCache(qc: QueryClient, item: Cuenta) {
   qc.setQueriesData<PaginatedResponse<Cuenta>>(
     { queryKey: ['cuentas'], exact: false },
     (old) => {
-      if (!old) return old
+      if (!esPaginado(old)) return old
       return {
         ...old,
         data: old.data.map((i) => (i.id === item.id ? item : i)),
@@ -38,7 +42,7 @@ function removerDeCache(qc: QueryClient, id: string) {
   qc.setQueriesData<PaginatedResponse<Cuenta>>(
     { queryKey: ['cuentas'], exact: false },
     (old) => {
-      if (!old) return old
+      if (!esPaginado(old)) return old
       return {
         ...old,
         data: old.data.filter((i) => i.id !== id),
