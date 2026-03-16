@@ -51,7 +51,7 @@ export function TransferenciaForm({ open, onOpenChange }: TransferenciaFormProps
   const crear = useCrearTransferencia()
   const { data: cuentasData } = useCuentas({ estado: 'ACTIVA', limit: 50 }, open)
   const cuentas = cuentasData?.data || []
-  const { data: tasas } = useTasasDolar()
+  const { data: tasas } = useTasasDolar(open)
   const tipoDolar = useUIStore((s) => s.tipoDolar)
   const ultimoCampo = useRef<'monto' | 'cotizacion' | 'montoDestino' | null>(null)
 

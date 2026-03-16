@@ -29,10 +29,11 @@ function removerDeCacheLista(qc: QueryClient, id: string) {
 
 // ─── Queries ─────────────────────────────────────────────
 
-export function useEtiquetas() {
+export function useEtiquetas(enabled = true) {
   return useQuery({
     queryKey: ['etiquetas'],
     queryFn: api.listar,
+    enabled,
   })
 }
 

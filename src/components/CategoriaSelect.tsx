@@ -106,7 +106,7 @@ export function CategoriaSelect({
       <Popover.Portal>
         <Popover.Positioner side="bottom" sideOffset={4} align="start" className="z-50">
           <Popover.Popup
-            className="w-(--anchor-width) min-w-[200px] rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 origin-(--transform-origin) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
+            className="w-(--anchor-width) min-w-50 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 origin-(--transform-origin) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
           >
             {/* Busqueda */}
             <div className="flex items-center gap-2 border-b px-3 py-2">
@@ -122,7 +122,7 @@ export function CategoriaSelect({
             </div>
 
             {/* Lista */}
-            <div className="max-h-[240px] overflow-y-auto p-1">
+            <div className="max-h-60 overflow-y-auto p-1">
               {allowNone && (
                 <button
                   type="button"

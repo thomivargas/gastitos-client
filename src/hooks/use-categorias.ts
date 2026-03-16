@@ -29,10 +29,11 @@ function removerDeCacheLista(qc: QueryClient, id: string) {
 
 // ─── Queries ─────────────────────────────────────────────
 
-export function useCategorias(clasificacion?: ClasificacionCategoria) {
+export function useCategorias(clasificacion?: ClasificacionCategoria, enabled = true) {
   return useQuery({
     queryKey: ['categorias', clasificacion],
     queryFn: () => api.listar(clasificacion),
+    enabled,
   })
 }
 

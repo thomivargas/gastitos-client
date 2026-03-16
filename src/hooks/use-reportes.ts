@@ -37,10 +37,11 @@ export function useTopGastos(desde?: string, hasta?: string, limit?: number) {
   })
 }
 
-export function useTasasDolar() {
+export function useTasasDolar(enabled = true) {
   return useQuery({
     queryKey: ['monedas', 'tasas'],
     queryFn: monedasApi.obtenerTasas,
     staleTime: 10 * 60 * 1000, // 10 min
+    enabled,
   })
 }

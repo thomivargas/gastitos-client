@@ -32,7 +32,7 @@ export default function GraficoCategoria({ desde, hasta }: GraficoCategoriaProps
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="h-[300px] animate-pulse bg-muted rounded" />
+          <div className="h-75 animate-pulse bg-muted rounded" />
         ) : chartData.length === 0 ? (
           <p className="text-muted-foreground text-center py-12">Sin gastos en este periodo</p>
         ) : (

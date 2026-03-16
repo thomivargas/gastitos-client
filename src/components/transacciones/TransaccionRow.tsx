@@ -23,56 +23,70 @@ export const TransaccionRow = memo(function TransaccionRow({ transaccion: t, onE
   const isIngreso = t.tipo === 'INGRESO'
 
   return (
-    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2.5 rounded-md hover:bg-accent/50 group">
-      {/* Icono tipo */}
-      <div className={`shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
+    <div className="flex items-center gap-3 px-3 py-3 sm:px-4 rounded-lg hover:bg-accent/40 group transition-colors">
+      {/* Icono tipo con fondo */}
+      <div className={`shrink-0 flex items-center justify-center h-8 w-8 rounded-full ${
+        isIngreso
+          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+          : 'bg-red-500/10 text-red-500 dark:text-red-400'
+      }`}>
         {isIngreso ? (
-          <ArrowUpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+          <ArrowUpCircle className="h-4 w-4" />
         ) : (
-          <ArrowDownCircle className="h-4 w-4 sm:h-5 sm:w-5" />
+          <ArrowDownCircle className="h-4 w-4" />
         )}
       </div>
 
-      {/* Fecha */}
-      <span className="text-xs sm:text-sm text-muted-foreground shrink-0">
-        {formatFechaCorta(t.fecha)}
-      </span>
-
       {/* Descripcion + categoria + etiquetas */}
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{t.descripcion}</p>
-        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-medium truncate">{t.descripcion}</p>
+        </div>
+        <div className="flex items-center gap-2 mt-0.5">
+          <span className="text-[11px] text-muted-foreground tabular-nums shrink-0">
+            {formatFechaCorta(t.fecha)}
+          </span>
           {t.categoria && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span
-                className="h-2 w-2 rounded-full shrink-0"
-                style={{ backgroundColor: t.categoria.color }}
-              />
-              <span className="truncate max-w-[80px] sm:max-w-none">{t.categoria.nombre}</span>
-            </span>
+            <>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="flex items-center gap-1 text-[11px] text-muted-foreground truncate">
+                <span
+                  className="h-2 w-2 rounded-full shrink-0"
+                  style={{ backgroundColor: t.categoria.color }}
+                />
+                <span className="truncate">{t.categoria.nombre}</span>
+              </span>
+            </>
           )}
           {t.etiquetas.slice(0, 2).map((et) => (
             <Badge key={et.id} variant="secondary" className="text-[10px] px-1.5 py-0 hidden sm:inline-flex">
               {et.nombre}
             </Badge>
           ))}
+          {t.etiquetas.length > 2 && (
+            <span className="text-[10px] text-muted-foreground hidden sm:inline">
+              +{t.etiquetas.length - 2}
+            </span>
+          )}
         </div>
       </div>
 
       {/* Cuenta */}
-      <span className="text-xs text-muted-foreground hidden md:block shrink-0 truncate max-w-[100px]">
+      <span className="text-xs text-muted-foreground hidden md:block shrink-0 truncate max-w-25 bg-muted/50 px-2 py-0.5 rounded">
         {t.cuenta.nombre}
       </span>
 
       {/* Monto */}
-      <span className={`text-xs sm:text-sm font-semibold tabular-nums shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
+      <span className={`text-sm font-semibold tabular-nums shrink-0 ${
+        isIngreso ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'
+      }`}>
         {isIngreso ? '+' : '-'}{formatMonto(t.monto, t.moneda)}
       </span>
 
       {/* Acciones */}
       <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
         <DropdownMenu>
-          <DropdownMenuTrigger className="p-1 rounded hover:bg-accent cursor-pointer" aria-label="Mas opciones">
+          <DropdownMenuTrigger className="p-1.5 rounded-md hover:bg-accent cursor-pointer" aria-label="Mas opciones">
             <MoreVertical className="h-4 w-4 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
