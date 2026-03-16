@@ -42,13 +42,30 @@ export default function ImportacionPage() {
     try {
       const data = await importApi.preview(file)
       setPreview(data)
-      // Auto-mapeo: buscar columnas con nombres comunes
+      // Auto-mapeo: buscar columnas con nombres comunes (incluye variantes de bancos argentinos)
       const cols = data.columnas.map((c) => c.toLowerCase())
+      const encontrar = (...terminos: string[]) =>
+        data.columnas[cols.findIndex((c) => terminos.some((t) => c.includes(t)))] || ''
       setMapeo({
-        fecha: data.columnas[cols.findIndex((c) => c.includes('fecha') || c.includes('date'))] || '',
-        monto: data.columnas[cols.findIndex((c) => c.includes('monto') || c.includes('amount'))] || '',
-        descripcion: data.columnas[cols.findIndex((c) => c.includes('desc'))] || '',
+        fecha: encontrar('fecha', 'date', 'día', 'dia'),
+        monto: encontrar('monto', 'amount', 'importe', 'débito', 'debito', 'cargo', 'pesos'),
+        descripcion: encontrar('desc', 'establecimiento', 'concepto', 'detalle', 'comercio', 'movimiento'),
       })
+      // Auto-detectar separador decimal: si los montos usan coma como decimal
+      const montoCol = encontrar('monto', 'amount', 'importe', 'débito', 'debito', 'cargo', 'pesos')
+      if (montoCol && data.filas.length > 0) {
+        const muestraStr = data.filas[0]?.[montoCol] ?? ''
+        // Patron X.XXX,XX -> separador decimal es coma
+        if (/\d\.\d{3},\d/.test(muestraStr)) setSeparadorDecimal(',')
+      }
+      // Auto-detectar formato de fecha
+      const fechaCol = encontrar('fecha', 'date', 'día', 'dia')
+      if (fechaCol && data.filas.length > 0) {
+        const muestraFecha = data.filas[0]?.[fechaCol] ?? ''
+        if (/^\d{2}\/\d{2}\/\d{4}$/.test(muestraFecha)) setFormatoFecha('DD/MM/YYYY')
+        else if (/^\d{4}-\d{2}-\d{2}$/.test(muestraFecha)) setFormatoFecha('YYYY-MM-DD')
+        else if (/^\d{2}-\d{2}-\d{4}$/.test(muestraFecha)) setFormatoFecha('DD-MM-YYYY')
+      }
       setPaso('mapeo')
     } catch {
       toast.error('Error al leer el archivo')
