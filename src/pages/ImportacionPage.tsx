@@ -85,16 +85,16 @@ export default function ImportacionPage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Importar / Exportar</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 shrink-0">
           <Button variant="outline" size="sm" onClick={() => importApi.descargarPlantilla()}>
-            <FileSpreadsheet className="h-4 w-4 mr-2" />
-            Plantilla
+            <FileSpreadsheet className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Plantilla</span>
           </Button>
           <Button variant="outline" size="sm" onClick={() => importApi.exportar()}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
+            <Download className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Exportar</span>
           </Button>
         </div>
       </div>
@@ -142,7 +142,7 @@ export default function ImportacionPage() {
               </Select>
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {(['fecha', 'monto', 'descripcion'] as const).map((campo) => (
                 <div key={campo} className="space-y-1">
                   <Label className="capitalize">{campo} *</Label>

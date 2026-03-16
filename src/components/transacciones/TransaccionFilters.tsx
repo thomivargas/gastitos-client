@@ -56,24 +56,24 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap gap-3">
-        {/* Busqueda */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Buscar por descripcion..."
-            value={busquedaLocal}
-            onChange={(e) => handleBusqueda(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+      {/* Busqueda */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por descripcion..."
+          value={busquedaLocal}
+          onChange={(e) => handleBusqueda(e.target.value)}
+          className="pl-9"
+        />
+      </div>
 
+      <div className="flex flex-wrap gap-3">
         {/* Tipo */}
         <Select
           value={filtros.tipo ?? null}
           onValueChange={(v) => update({ tipo: v === '_all' ? undefined : v ?? undefined })}
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-full sm:w-[130px]">
             <SelectValue placeholder="Todos">
               {(value: string) => {
                 if (!value) return 'Todos'
@@ -94,7 +94,7 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
           value={filtros.cuentaId ?? null}
           onValueChange={(v) => update({ cuentaId: v === '_all' ? undefined : v ?? undefined })}
         >
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[170px]">
             <SelectValue placeholder="Todas las cuentas">
               {(value: string) => {
                 if (!value || value === '_all') return 'Todas las cuentas'
@@ -111,7 +111,7 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
         </Select>
 
         {/* Categoria */}
-        <div className="w-[180px]">
+        <div className="w-full sm:w-[170px]">
           <CategoriaSelect
             categorias={categorias}
             value={filtros.categoriaId}
@@ -125,19 +125,19 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
 
       <div className="flex flex-wrap gap-3 items-center">
         {/* Fechas */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Input
             type="date"
             value={filtros.fechaDesde || ''}
             onChange={(e) => update({ fechaDesde: e.target.value || undefined })}
-            className="w-[150px]"
+            className="w-full sm:w-[150px]"
           />
-          <span className="text-sm text-muted-foreground">a</span>
+          <span className="text-sm text-muted-foreground hidden sm:inline">a</span>
           <Input
             type="date"
             value={filtros.fechaHasta || ''}
             onChange={(e) => update({ fechaHasta: e.target.value || undefined })}
-            className="w-[150px]"
+            className="w-full sm:w-[150px]"
           />
         </div>
 
@@ -148,7 +148,7 @@ export const TransaccionFilters = memo(function TransaccionFilters({ filtros, on
             onClick={() => onChange({ page: 1, limit: filtros.limit })}
           >
             <X className="h-4 w-4 mr-1" />
-            Limpiar filtros
+            Limpiar
           </Button>
         )}
       </div>

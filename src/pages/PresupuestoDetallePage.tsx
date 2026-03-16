@@ -52,19 +52,19 @@ export default function PresupuestoDetallePage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/presupuestos')}>
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/presupuestos')} className="shrink-0 mt-0.5">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
             {formatFecha(presupuesto.fechaInicio, 'dd MMM')} - {formatFecha(presupuesto.fechaFin, 'dd MMM yyyy')}
           </h1>
           <p className="text-sm text-muted-foreground">{presupuesto.moneda}</p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => setAddCatOpen(true)}>
-          <Plus className="h-4 w-4 mr-1" />
-          Asignar categoria
+        <Button variant="outline" size="sm" onClick={() => setAddCatOpen(true)} className="shrink-0">
+          <Plus className="h-4 w-4 sm:mr-1" />
+          <span className="hidden sm:inline">Asignar</span>
         </Button>
       </div>
 

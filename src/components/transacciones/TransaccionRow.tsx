@@ -23,36 +23,36 @@ export const TransaccionRow = memo(function TransaccionRow({ transaccion: t, onE
   const isIngreso = t.tipo === 'INGRESO'
 
   return (
-    <div className="flex items-center gap-3 px-3 py-2.5 rounded-md hover:bg-accent/50 group">
+    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-2.5 rounded-md hover:bg-accent/50 group">
       {/* Icono tipo */}
       <div className={`shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
         {isIngreso ? (
-          <ArrowUpCircle className="h-5 w-5" />
+          <ArrowUpCircle className="h-4 w-4 sm:h-5 sm:w-5" />
         ) : (
-          <ArrowDownCircle className="h-5 w-5" />
+          <ArrowDownCircle className="h-4 w-4 sm:h-5 sm:w-5" />
         )}
       </div>
 
       {/* Fecha */}
-      <span className="text-sm text-muted-foreground w-12 shrink-0">
+      <span className="text-xs sm:text-sm text-muted-foreground shrink-0">
         {formatFechaCorta(t.fecha)}
       </span>
 
       {/* Descripcion + categoria + etiquetas */}
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{t.descripcion}</p>
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
           {t.categoria && (
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
               <span
                 className="h-2 w-2 rounded-full shrink-0"
                 style={{ backgroundColor: t.categoria.color }}
               />
-              {t.categoria.nombre}
+              <span className="truncate max-w-[80px] sm:max-w-none">{t.categoria.nombre}</span>
             </span>
           )}
-          {t.etiquetas.map((et) => (
-            <Badge key={et.id} variant="secondary" className="text-[10px] px-1.5 py-0">
+          {t.etiquetas.slice(0, 2).map((et) => (
+            <Badge key={et.id} variant="secondary" className="text-[10px] px-1.5 py-0 hidden sm:inline-flex">
               {et.nombre}
             </Badge>
           ))}
@@ -60,12 +60,12 @@ export const TransaccionRow = memo(function TransaccionRow({ transaccion: t, onE
       </div>
 
       {/* Cuenta */}
-      <span className="text-xs text-muted-foreground hidden sm:block shrink-0">
+      <span className="text-xs text-muted-foreground hidden md:block shrink-0 truncate max-w-[100px]">
         {t.cuenta.nombre}
       </span>
 
       {/* Monto */}
-      <span className={`text-sm font-semibold tabular-nums shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
+      <span className={`text-xs sm:text-sm font-semibold tabular-nums shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
         {isIngreso ? '+' : '-'}{formatMonto(t.monto, t.moneda)}
       </span>
 

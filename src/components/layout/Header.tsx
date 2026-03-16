@@ -67,7 +67,7 @@ export function Header() {
 
       <div className="flex-1 min-w-0">
         {pageTitle && (
-          <h2 className="text-sm font-medium text-muted-foreground hidden md:block truncate">
+          <h2 className="text-sm font-medium text-muted-foreground truncate">
             {pageTitle}
           </h2>
         )}

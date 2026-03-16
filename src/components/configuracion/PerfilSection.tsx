@@ -56,7 +56,7 @@ export function PerfilSection() {
           <Label>Email</Label>
           <Input value={usuario?.email || ''} disabled />
         </div>
-        <div className="grid grid-cols-[1fr_auto] gap-4 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto] gap-4 sm:items-end">
           <div className="space-y-2">
             <Label>Nombre</Label>
             <Input {...perfilForm.register('nombre')} />
@@ -64,10 +64,10 @@ export function PerfilSection() {
               <p className="text-xs text-destructive">{perfilForm.formState.errors.nombre.message}</p>
             )}
           </div>
-          <div>
-            <Label className='mb-2'>Moneda</Label>
+          <div className="space-y-2">
+            <Label>Moneda</Label>
             <Select value={moneda} onValueChange={(v) => v && perfilForm.setValue('moneda', v)}>
-              <SelectTrigger className="w-28">
+              <SelectTrigger className="w-full sm:w-28">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>

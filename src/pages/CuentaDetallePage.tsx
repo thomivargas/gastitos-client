@@ -55,32 +55,45 @@ export default function CuentaDetallePage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/cuentas')}>
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate('/cuentas')} className="shrink-0 mt-0.5">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold">{cuenta.nombre}</h1>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h1 className="text-2xl font-bold truncate">{cuenta.nombre}</h1>
             {isArchivada && <Badge variant="secondary">Archivada</Badge>}
           </div>
           <p className="text-sm text-muted-foreground">{tipoInfo.label}</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setFormOpen(true)}>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => setFormOpen(true)}>
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => setFormOpen(true)}>
             <Pencil className="h-4 w-4 mr-1" />
             Editar
           </Button>
           {isArchivada ? (
-            <Button variant="outline" size="sm" onClick={() => reactivar.mutate(cuenta.id)}>
-              <RotateCcw className="h-4 w-4 mr-1" />
-              Reactivar
-            </Button>
+            <>
+              <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => reactivar.mutate(cuenta.id)}>
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => reactivar.mutate(cuenta.id)}>
+                <RotateCcw className="h-4 w-4 mr-1" />
+                Reactivar
+              </Button>
+            </>
           ) : (
-            <Button variant="outline" size="sm" onClick={() => archivar.mutate(cuenta.id)}>
-              <Archive className="h-4 w-4 mr-1" />
-              Archivar
-            </Button>
+            <>
+              <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => archivar.mutate(cuenta.id)}>
+                <Archive className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => archivar.mutate(cuenta.id)}>
+                <Archive className="h-4 w-4 mr-1" />
+                Archivar
+              </Button>
+            </>
           )}
         </div>
       </div>

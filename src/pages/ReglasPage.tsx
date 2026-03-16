@@ -31,16 +31,16 @@ export default function ReglasPage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Reglas de categorizacion</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => aplicar.mutate()} disabled={aplicar.isPending}>
-            <Zap className="h-4 w-4 mr-2" />
-            Aplicar reglas
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-2xl font-bold">Reglas</h1>
+        <div className="flex gap-2 shrink-0">
+          <Button variant="outline" onClick={() => aplicar.mutate()} disabled={aplicar.isPending} size="sm">
+            <Zap className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Aplicar</span>
           </Button>
-          <Button onClick={() => setFormOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nueva regla
+          <Button onClick={() => setFormOpen(true)} size="sm">
+            <Plus className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Nueva regla</span>
           </Button>
         </div>
       </div>
@@ -63,31 +63,31 @@ export default function ReglasPage() {
         <Card>
           <CardContent className="p-2 md:p-4 divide-y">
             {reglas.map((r) => (
-              <div key={r.id} className="flex items-center gap-3 px-3 py-3 group">
+              <div key={r.id} className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-3 group">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium">{r.nombre}</p>
-                    <Badge variant={r.activa ? 'default' : 'secondary'} className="text-[10px]">
+                    <p className="text-sm font-medium truncate">{r.nombre}</p>
+                    <Badge variant={r.activa ? 'default' : 'secondary'} className="text-[10px] shrink-0">
                       {r.activa ? 'Activa' : 'Inactiva'}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground font-mono">/{r.patron}/</p>
+                  <p className="text-xs text-muted-foreground font-mono truncate">/{r.patron}/</p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="hidden sm:flex items-center gap-2 shrink-0">
                   <span
                     className="h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: r.categoria.color }}
                   />
-                  <span className="text-sm text-muted-foreground">{r.categoria.nombre}</span>
+                  <span className="text-sm text-muted-foreground truncate max-w-[100px]">{r.categoria.nombre}</span>
                 </div>
 
-                <span className="text-xs text-muted-foreground">P:{r.prioridad}</span>
+                <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">P:{r.prioridad}</span>
 
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                  className="h-7 w-7 shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                   onClick={() => setConfirmId(r.id)}
                   aria-label="Eliminar regla"
                 >

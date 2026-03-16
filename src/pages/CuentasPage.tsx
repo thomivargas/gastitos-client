@@ -30,11 +30,11 @@ export default function CuentasPage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Cuentas</h1>
-        <Button onClick={handleNew}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva cuenta
+        <Button onClick={handleNew} className="shrink-0">
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Nueva cuenta</span>
         </Button>
       </div>
 

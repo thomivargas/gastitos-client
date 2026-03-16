@@ -27,11 +27,11 @@ export default function PresupuestosPage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Presupuestos</h1>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo presupuesto
+        <Button onClick={() => setFormOpen(true)} className="shrink-0">
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Nuevo presupuesto</span>
         </Button>
       </div>
 
@@ -86,7 +86,7 @@ export default function PresupuestosPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-6 text-sm">
+                  <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                     {p.gastoPresupuestado != null && (
                       <div>
                         <span className="text-muted-foreground">Gasto: </span>

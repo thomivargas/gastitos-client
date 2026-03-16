@@ -25,9 +25,37 @@ export function ConfiguracionDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden" showCloseButton={false}>
-        <Tabs defaultValue="perfil" orientation="vertical" className="h-[520px]">
-          {/* Sidebar */}
+      <DialogContent className="sm:max-w-2xl p-0 overflow-hidden max-h-[90dvh] sm:max-h-none" showCloseButton={false}>
+        {/* Mobile: tabs horizontales arriba */}
+        <Tabs defaultValue="perfil" className="flex flex-col sm:hidden">
+          <div className="px-4 pt-4 pb-2">
+            <DialogTitle className="text-base font-semibold">Configuracion</DialogTitle>
+          </div>
+          <TabsList variant="line" className="flex px-4 gap-1 overflow-x-auto shrink-0">
+            {tabs.map(({ value, label, icon: Icon }) => (
+              <TabsTrigger key={value} value={value} className="gap-1.5 px-3 py-2 text-xs shrink-0">
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <Separator />
+          <TabsContent value="perfil" className="overflow-y-auto p-4 flex-1">
+            <PerfilSection />
+          </TabsContent>
+          <TabsContent value="apariencia" className="overflow-y-auto p-4 flex-1">
+            <AparienciaSection />
+          </TabsContent>
+          <TabsContent value="seguridad" className="overflow-y-auto p-4 flex-1">
+            <SeguridadSection />
+          </TabsContent>
+          <TabsContent value="sesiones" className="overflow-y-auto p-4 flex-1">
+            <SesionesSection />
+          </TabsContent>
+        </Tabs>
+
+        {/* Desktop: tabs verticales lateral */}
+        <Tabs defaultValue="perfil" orientation="vertical" className="hidden sm:flex h-[520px]">
           <div className="flex flex-col w-48 shrink-0 bg-muted/30 p-4 gap-4">
             <DialogTitle className="text-base font-semibold">Configuracion</DialogTitle>
             <TabsList variant="line" className="flex flex-col gap-1">
@@ -42,7 +70,6 @@ export function ConfiguracionDialog() {
 
           <Separator orientation="vertical" />
 
-          {/* Contenido */}
           <TabsContent value="perfil" className="overflow-y-auto p-6">
             <PerfilSection />
           </TabsContent>

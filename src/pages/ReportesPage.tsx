@@ -28,19 +28,19 @@ export default function ReportesPage() {
       <h1 className="text-2xl font-bold">Reportes</h1>
 
       {/* Filtros de periodo */}
-      <div className="flex flex-wrap gap-4 items-end">
+      <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 items-end">
         <div className="space-y-1">
           <Label>Desde</Label>
-          <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="w-[160px]" />
+          <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} />
         </div>
         <div className="space-y-1">
           <Label>Hasta</Label>
-          <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="w-[160px]" />
+          <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} />
         </div>
-        <div className="space-y-1">
+        <div className="space-y-1 col-span-2 sm:col-span-1">
           <Label>Agrupacion</Label>
           <Select value={agrupacion} onValueChange={(v) => v && setAgrupacion(v)}>
-            <SelectTrigger className="w-[130px]">
+            <SelectTrigger className="sm:w-[130px]">
               <SelectValue>
                 {(value: string) => {
                   if (!value) return 'Agrupacion'

@@ -44,11 +44,11 @@ export default function RecurrentesPage() {
 
   return (
     <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3">
         <h1 className="text-2xl font-bold">Recurrentes</h1>
-        <Button onClick={() => setFormOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Nueva recurrente
+        <Button onClick={() => setFormOpen(true)} className="shrink-0">
+          <Plus className="h-4 w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Nueva recurrente</span>
         </Button>
       </div>
 
@@ -115,26 +115,27 @@ function RecurrenteRow({
   const isIngreso = r.tipo === 'INGRESO'
 
   return (
-    <div className="flex items-center gap-3 px-3 py-3 group">
+    <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-3 group">
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium truncate">{r.descripcion}</p>
-          <Badge variant={r.activa ? 'default' : 'secondary'} className="text-[10px]">
+          <Badge variant={r.activa ? 'default' : 'secondary'} className="text-[10px] shrink-0">
             {r.activa ? 'Activa' : 'Pausada'}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground truncate">
           {FRECUENCIA_LABELS[r.frecuencia as FrecuenciaRecurrencia] || r.frecuencia}
-          {' · Proxima: '}
+          {' · '}
+          <span className="hidden sm:inline">Proxima: </span>
           {formatFecha(r.proximaFecha)}
         </p>
       </div>
 
-      <span className={`text-sm font-semibold tabular-nums ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
+      <span className={`text-xs sm:text-sm font-semibold tabular-nums shrink-0 ${isIngreso ? 'text-green-600' : 'text-red-500'}`}>
         {isIngreso ? '+' : '-'}{formatMonto(r.monto, r.moneda)}
       </span>
 
-      <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+      <div className="flex gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">
         <Button variant="ghost" size="icon" className="h-7 w-7" onClick={r.activa ? onDesactivar : onActivar} aria-label={r.activa ? 'Pausar' : 'Activar'}>
           {r.activa ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
         </Button>

@@ -63,7 +63,7 @@ export default function MonedaPage() {
           <CardTitle className="text-base">Convertidor USD → ARS</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap gap-4 items-end">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4 items-end">
             <div className="space-y-1">
               <Label>Monto USD</Label>
               <Input
@@ -72,13 +72,12 @@ export default function MonedaPage() {
                 min="0"
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
-                className="w-[140px]"
               />
             </div>
             <div className="space-y-1">
               <Label>Tipo</Label>
               <Select value={tipo} onValueChange={(v) => v && setTipo(v)}>
-                <SelectTrigger className="w-[130px]">
+                <SelectTrigger>
                   <SelectValue>
                     {(value: string) => {
                       if (!value) return 'Tipo'
@@ -94,7 +93,7 @@ export default function MonedaPage() {
                 </SelectContent>
               </Select>
             </div>
-            <Button onClick={handleConvertir} disabled={converting}>
+            <Button onClick={handleConvertir} disabled={converting} className="col-span-2 sm:col-span-1">
               <RefreshCw className={`h-4 w-4 mr-2 ${converting ? 'animate-spin' : ''}`} />
               Convertir
             </Button>
