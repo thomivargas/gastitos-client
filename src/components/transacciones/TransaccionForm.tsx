@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/select'
 import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { Badge } from '@/components/ui/badge'
-import { X, ArrowDownCircle, ArrowUpCircle, Calendar, DollarSign } from 'lucide-react'
+import { X, ArrowDownCircle, ArrowUpCircle, DollarSign } from 'lucide-react'
 import { useCuentas } from '@/hooks/use-cuentas'
 import { useCategorias } from '@/hooks/use-categorias'
 import { useEtiquetas } from '@/hooks/use-etiquetas'
