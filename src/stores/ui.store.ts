@@ -6,6 +6,7 @@ type TipoDolar = 'blue' | 'mep' | 'oficial'
 
 interface UIState {
   sidebarOpen: boolean
+  sidebarCollapsed: boolean
   configuracionOpen: boolean
   theme: Theme
   monedaDisplay: Moneda
@@ -13,6 +14,7 @@ interface UIState {
 
   toggleSidebar: () => void
   setSidebarOpen: (open: boolean) => void
+  toggleSidebarCollapsed: () => void
   setConfiguracionOpen: (open: boolean) => void
   setTheme: (theme: Theme) => void
   setMonedaDisplay: (moneda: Moneda) => void
@@ -21,6 +23,7 @@ interface UIState {
 
 export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: false,
+  sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
   configuracionOpen: false,
   theme: (localStorage.getItem('theme') as Theme) || 'system',
   monedaDisplay: (localStorage.getItem('monedaDisplay') as Moneda) || 'ARS',
@@ -28,6 +31,11 @@ export const useUIStore = create<UIState>((set) => ({
 
   toggleSidebar: () => set((s) => ({ sidebarOpen: !s.sidebarOpen })),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
+  toggleSidebarCollapsed: () => set((s) => {
+    const next = !s.sidebarCollapsed
+    localStorage.setItem('sidebarCollapsed', String(next))
+    return { sidebarCollapsed: next }
+  }),
   setConfiguracionOpen: (open) => set({ configuracionOpen: open }),
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)

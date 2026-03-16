@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router'
-import { Menu, Moon, Sun, LogOut } from 'lucide-react'
+import { Menu, Moon, Sun, LogOut, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -40,6 +40,8 @@ function getPageTitle(pathname: string): string | null {
 export function Header() {
   const usuario = useAuthStore((s) => s.usuario)
   const toggleSidebar = useUIStore((s) => s.toggleSidebar)
+  const toggleSidebarCollapsed = useUIStore((s) => s.toggleSidebarCollapsed)
+  const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
   const theme = useUIStore((s) => s.theme)
   const setTheme = useUIStore((s) => s.setTheme)
   const logout = useLogout()
@@ -60,12 +62,28 @@ export function Header() {
   }
 
   return (
-    <header className="flex items-center h-14 px-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10 gap-4">
-      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="lg:hidden" aria-label="Abrir menu">
+    <header className="flex items-center h-14 px-4 border-b bg-background/80 backdrop-blur-sm sticky top-0 z-10 gap-3">
+      {/* Mobile: hamburger */}
+      <Button variant="ghost" size="icon" onClick={toggleSidebar} className="lg:hidden shrink-0" aria-label="Abrir menu">
         <Menu className="h-5 w-5" />
       </Button>
 
-      <div className="flex-1 min-w-0">
+      {/* Desktop: collapse toggle */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebarCollapsed}
+        className="hidden lg:flex shrink-0"
+        aria-label={sidebarCollapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
+      >
+        {sidebarCollapsed
+          ? <PanelLeftOpen className="h-4 w-4" />
+          : <PanelLeftClose className="h-4 w-4" />
+        }
+      </Button>
+
+      {/* Título de página: solo en mobile */}
+      <div className="flex-1 min-w-0 lg:hidden">
         {pageTitle && (
           <h2 className="text-sm font-medium text-muted-foreground truncate">
             {pageTitle}
@@ -73,8 +91,10 @@ export function Header() {
         )}
       </div>
 
-      {location.pathname === '/' && <MonedaToggle />}
+      {/* Spacer en desktop */}
+      <div className="flex-1 hidden lg:block" />
 
+      {location.pathname === '/' && <MonedaToggle />}
       {location.pathname === '/' && <DolarBadge />}
 
       <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Cambiar tema">

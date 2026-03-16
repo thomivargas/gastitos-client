@@ -4,16 +4,20 @@ import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { ConfiguracionDialog } from '@/components/configuracion/ConfiguracionDialog'
 import { TooltipProvider } from '@/components/ui/tooltip'
+import { useUIStore } from '@/stores/ui.store'
 
 export function AppLayout() {
   const location = useLocation()
+  const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
+
+  const sidebarW = sidebarCollapsed ? 'w-14' : 'w-60'
 
   return (
     <TooltipProvider>
       <div className="min-h-screen flex">
-        {/* Desktop sidebar — siempre visible en lg+ */}
-        <div className="hidden lg:block w-60 border-r border-sidebar-border shrink-0">
-          <Sidebar className="fixed top-0 left-0 w-60 h-screen" />
+        {/* Desktop sidebar */}
+        <div className={`hidden lg:block ${sidebarW} border-r border-sidebar-border shrink-0 transition-[width] duration-200`}>
+          <Sidebar className={`fixed top-0 left-0 ${sidebarW} h-screen transition-[width] duration-200`} />
         </div>
 
         {/* Mobile sidebar — Sheet overlay */}

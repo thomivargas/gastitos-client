@@ -19,7 +19,7 @@ export function MobileNav() {
       <Sheet open={mobileOpen} onOpenChange={setSidebarOpen}>
         <SheetContent side="left" className="p-0 w-60">
           <SheetTitle className="sr-only">Menu de navegacion</SheetTitle>
-          <Sidebar />
+          <Sidebar forceExpanded />
         </SheetContent>
       </Sheet>
     </div>
