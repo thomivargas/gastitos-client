@@ -102,7 +102,7 @@ export default function ImportacionPage() {
       {paso === 'upload' && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Paso 1: Subir archivo CSV</CardTitle>
+            <CardTitle className="text-base">Paso 1: Subir archivo</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div
@@ -110,10 +110,10 @@ export default function ImportacionPage() {
               onClick={() => fileRef.current?.click()}
             >
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Click para seleccionar un archivo CSV</p>
-              <p className="text-xs text-muted-foreground mt-1">Maximo 5MB</p>
+              <p className="text-sm text-muted-foreground">Click para seleccionar un archivo</p>
+              <p className="text-xs text-muted-foreground mt-1">CSV, Excel (.xlsx, .xls) — Máximo 10MB</p>
             </div>
-            <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
+            <input ref={fileRef} type="file" accept=".csv,.xlsx,.xls" className="hidden" onChange={handleFileChange} />
             {loading && <p className="text-sm text-muted-foreground">Procesando...</p>}
           </CardContent>
         </Card>
