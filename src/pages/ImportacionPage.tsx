@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
-import { Upload, Download, FileSpreadsheet, Building2, Table2, CheckCircle2, ChevronRight } from 'lucide-react'
+import {
+  Upload, Download, FileSpreadsheet, Building2, Table2,
+  CheckCircle2, ArrowRight, X, FileText, Ban
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import {
   Select,
@@ -18,28 +20,62 @@ import * as importApi from '@/api/importacion.api'
 type Modo = 'generico' | 'bancario'
 type Paso = 'modo' | 'upload' | 'mapeo' | 'preview-bancario' | 'resultado'
 
-const PASOS_LABEL: Record<Paso, string> = {
-  modo: 'Modo',
+const FLUJO_GENERICO: Paso[] = ['modo', 'upload', 'mapeo', 'resultado']
+const FLUJO_BANCARIO: Paso[] = ['modo', 'upload', 'preview-bancario', 'resultado']
+
+const PASO_LABEL: Record<Paso, string> = {
+  modo: 'Tipo',
   upload: 'Archivo',
-  mapeo: 'Mapeo',
+  mapeo: 'Columnas',
   'preview-bancario': 'Preview',
-  resultado: 'Resultado',
+  resultado: 'Listo',
 }
 
-function PasoIndicador({ pasoActual }: { pasoActual: Paso }) {
-  const modoFlow: Paso[] = ['modo', 'upload', 'mapeo', 'resultado']
-  const bancarioFlow: Paso[] = ['modo', 'upload', 'preview-bancario', 'resultado']
-  const flujo = pasoActual === 'mapeo' || (pasoActual === 'modo' || pasoActual === 'upload')
-    ? modoFlow : bancarioFlow
-  const idx = flujo.indexOf(pasoActual)
+function StepRail({ paso, modo }: { paso: Paso; modo: Modo }) {
+  const flujo = paso === 'mapeo'
+    ? FLUJO_GENERICO
+    : paso === 'preview-bancario'
+    ? FLUJO_BANCARIO
+    : modo === 'bancario' ? FLUJO_BANCARIO : FLUJO_GENERICO
+
+  const current = flujo.indexOf(paso)
+
   return (
-    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-      {flujo.map((p, i) => (
-        <span key={p} className="flex items-center gap-1">
-          <span className={i <= idx ? 'text-foreground font-medium' : ''}>{PASOS_LABEL[p]}</span>
-          {i < flujo.length - 1 && <ChevronRight className="h-3 w-3" />}
-        </span>
-      ))}
+    <div className="flex items-center gap-0">
+      {flujo.map((p, i) => {
+        const done = i < current
+        const active = i === current
+        return (
+          <div key={p} className="flex items-center">
+            <div className="flex flex-col items-center gap-1">
+              <div
+                className={`
+                  w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold
+                  transition-all duration-300
+                  ${done
+                    ? 'bg-foreground text-background'
+                    : active
+                    ? 'bg-amber-500 text-white shadow-sm shadow-amber-500/40'
+                    : 'bg-muted text-muted-foreground'
+                  }
+                `}
+              >
+                {done ? <CheckCircle2 className="h-3.5 w-3.5" /> : i + 1}
+              </div>
+              <span className={`text-[10px] font-medium whitespace-nowrap ${
+                active ? 'text-foreground' : 'text-muted-foreground'
+              }`}>
+                {PASO_LABEL[p]}
+              </span>
+            </div>
+            {i < flujo.length - 1 && (
+              <div className={`w-10 sm:w-16 h-px mb-4 mx-1 transition-colors duration-500 ${
+                i < current ? 'bg-foreground/40' : 'bg-border'
+              }`} />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -49,7 +85,6 @@ export default function ImportacionPage() {
   const cuentas = cuentasData?.data || []
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Paso del wizard
   const [paso, setPaso] = useState<Paso>('modo')
   const [modo, setModo] = useState<Modo>('generico')
   const [loading, setLoading] = useState(false)
@@ -70,18 +105,14 @@ export default function ImportacionPage() {
   const [excluirCargos, setExcluirCargos] = useState(true)
   const [previewBancario, setPreviewBancario] = useState<importApi.PreviewBancarioData | null>(null)
 
-  // Resultado
   const [resultado, setResultado] = useState<{ status: string; data?: unknown } | null>(null)
 
   useEffect(() => {
     importApi.listarParsers().then(setParsers).catch(() => {})
   }, [])
 
-  // Cuando cambia el modo, pre-seleccionar parser si solo hay uno
   useEffect(() => {
-    if (modo === 'bancario' && parsers.length === 1) {
-      setParserId(parsers[0]!.id)
-    }
+    if (modo === 'bancario' && parsers.length === 1) setParserId(parsers[0]!.id)
   }, [modo, parsers])
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -98,7 +129,6 @@ export default function ImportacionPage() {
       } else {
         const data = await importApi.preview(file)
         setPreview(data)
-        // Auto-mapeo
         const cols = data.columnas.map((c) => c.toLowerCase())
         const encontrar = (...terminos: string[]) =>
           data.columnas[cols.findIndex((c) => terminos.some((t) => c.includes(t)))] || ''
@@ -107,19 +137,16 @@ export default function ImportacionPage() {
           monto: encontrar('monto', 'amount', 'importe', 'débito', 'debito', 'cargo', 'pesos'),
           descripcion: encontrar('desc', 'establecimiento', 'concepto', 'detalle', 'comercio', 'movimiento'),
         })
-        // Auto-detectar separador decimal
         const montoCol = encontrar('monto', 'amount', 'importe', 'débito', 'debito', 'cargo', 'pesos')
         if (montoCol && data.filas.length > 0) {
-          const muestra = data.filas[0]?.[montoCol] ?? ''
-          if (/\d\.\d{3},\d/.test(muestra)) setSeparadorDecimal(',')
+          if (/\d\.\d{3},\d/.test(data.filas[0]?.[montoCol] ?? '')) setSeparadorDecimal(',')
         }
-        // Auto-detectar formato de fecha
         const fechaCol = encontrar('fecha', 'date', 'día', 'dia')
         if (fechaCol && data.filas.length > 0) {
-          const muestra = data.filas[0]?.[fechaCol] ?? ''
-          if (/^\d{2}\/\d{2}\/\d{4}$/.test(muestra)) setFormatoFecha('DD/MM/YYYY')
-          else if (/^\d{4}-\d{2}-\d{2}$/.test(muestra)) setFormatoFecha('YYYY-MM-DD')
-          else if (/^\d{2}-\d{2}-\d{4}$/.test(muestra)) setFormatoFecha('DD-MM-YYYY')
+          const m = data.filas[0]?.[fechaCol] ?? ''
+          if (/^\d{2}\/\d{2}\/\d{4}$/.test(m)) setFormatoFecha('DD/MM/YYYY')
+          else if (/^\d{4}-\d{2}-\d{2}$/.test(m)) setFormatoFecha('YYYY-MM-DD')
+          else if (/^\d{2}-\d{2}-\d{4}$/.test(m)) setFormatoFecha('DD-MM-YYYY')
         }
         setPaso('mapeo')
       }
@@ -182,445 +209,613 @@ export default function ImportacionPage() {
 
   const parserActual = parsers.find((p) => p.id === parserId)
   const resultadoBancario = resultado?.data as importApi.ResultadoBancario | undefined
+  const showRail = paso !== 'modo'
 
   return (
-    <div className="space-y-6 page-transition">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Importar / Exportar</h1>
-          {paso !== 'modo' && (
-            <div className="mt-1">
-              <PasoIndicador pasoActual={paso} />
-            </div>
-          )}
+    <div className="space-y-8 page-transition">
+
+      {/* ── Header ─────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="space-y-3">
+          <h1 className="text-2xl font-bold tracking-tight">Importar / Exportar</h1>
+          {showRail && <StepRail paso={paso} modo={modo} />}
         </div>
-        <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="sm" onClick={() => importApi.descargarPlantilla()}>
-            <FileSpreadsheet className="h-4 w-4 sm:mr-1" />
+        <div className="flex gap-2 shrink-0 pt-0.5">
+          <button
+            onClick={() => importApi.descargarPlantilla()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+              border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
+              transition-colors duration-150"
+          >
+            <FileSpreadsheet className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Plantilla</span>
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => importApi.exportar()}>
-            <Download className="h-4 w-4 sm:mr-1" />
+          </button>
+          <button
+            onClick={() => importApi.exportar()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+              border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
+              transition-colors duration-150"
+          >
+            <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Exportar</span>
-          </Button>
+          </button>
         </div>
       </div>
 
-      {/* Paso 0: Selector de modo */}
+      {/* ── Paso 0: Selector de modo ───────────────────────── */}
       {paso === 'modo' && (
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="space-y-5 animate-slide-up-fade">
+          <p className="text-sm text-muted-foreground">
+            ¿Qué tipo de archivo vas a importar?
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {/* Genérico */}
             <button
               onClick={() => setModo('generico')}
-              className={`text-left p-4 rounded-xl border-2 transition-colors ${
-                modo === 'generico'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
-              }`}
+              className={`
+                group text-left p-5 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden
+                ${modo === 'generico'
+                  ? 'border-amber-500/60 bg-amber-50/60 dark:bg-amber-950/20'
+                  : 'border-border hover:border-border/80 hover:bg-muted/30'
+                }
+              `}
             >
-              <Table2 className="h-8 w-8 mb-2 text-muted-foreground" />
-              <div className="font-semibold">CSV / Excel genérico</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Importa cualquier archivo con mapeo manual de columnas
+              {/* bg pattern */}
+              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+                style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '16px 16px' }}
+              />
+              {modo === 'generico' && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                  <CheckCircle2 className="h-3 w-3 text-white" />
+                </div>
+              )}
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+                modo === 'generico' ? 'bg-amber-500/15 text-amber-600' : 'bg-muted text-muted-foreground group-hover:bg-accent'
+              }`}>
+                <Table2 className="h-5 w-5" />
+              </div>
+              <div className="font-semibold text-sm">CSV / Excel genérico</div>
+              <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Cualquier archivo con columnas personalizadas. Mapeo manual.
+              </div>
+              <div className="flex gap-1 mt-3">
+                {['.csv', '.xlsx', '.xls'].map(ext => (
+                  <span key={ext} className="text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono text-muted-foreground">{ext}</span>
+                ))}
               </div>
             </button>
+
+            {/* Bancario */}
             <button
               onClick={() => setModo('bancario')}
-              className={`text-left p-4 rounded-xl border-2 transition-colors ${
-                modo === 'bancario'
-                  ? 'border-primary bg-primary/5'
-                  : 'border-border hover:border-primary/50'
-              }`}
+              className={`
+                group text-left p-5 rounded-2xl border-2 transition-all duration-200 relative overflow-hidden
+                ${modo === 'bancario'
+                  ? 'border-amber-500/60 bg-amber-50/60 dark:bg-amber-950/20'
+                  : 'border-border hover:border-border/80 hover:bg-muted/30'
+                }
+              `}
             >
-              <Building2 className="h-8 w-8 mb-2 text-muted-foreground" />
-              <div className="font-semibold">Resumen bancario</div>
-              <div className="text-sm text-muted-foreground mt-1">
-                Importa el resumen de tu banco con detección automática
+              <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.06]"
+                style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '16px 16px' }}
+              />
+              {modo === 'bancario' && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-amber-500 flex items-center justify-center">
+                  <CheckCircle2 className="h-3 w-3 text-white" />
+                </div>
+              )}
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 transition-colors ${
+                modo === 'bancario' ? 'bg-amber-500/15 text-amber-600' : 'bg-muted text-muted-foreground group-hover:bg-accent'
+              }`}>
+                <Building2 className="h-5 w-5" />
+              </div>
+              <div className="font-semibold text-sm">Resumen bancario</div>
+              <div className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Detección automática de columnas. Separa ARS y USD. Filtra cargos.
+              </div>
+              <div className="flex gap-1 mt-3">
+                {parsers.map(p => p.banco).filter((v, i, a) => a.indexOf(v) === i).map(banco => (
+                  <span key={banco} className="text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono text-muted-foreground">{banco}</span>
+                ))}
+                {parsers.length === 0 && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted font-mono text-muted-foreground">BBVA</span>
+                )}
               </div>
             </button>
           </div>
 
+          {/* Config bancaria */}
           {modo === 'bancario' && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-base">Configuración bancaria</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Banco / Tipo de resumen</Label>
-                  <Select value={parserId} onValueChange={(v) => v && setParserId(v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Seleccionar banco" />
+            <div className="rounded-2xl border border-border p-5 space-y-5 animate-slide-up-fade bg-card">
+              <div className="text-sm font-semibold">Configuración del banco</div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Banco / Tipo de resumen</Label>
+                <Select value={parserId} onValueChange={(v) => v && setParserId(v)}>
+                  <SelectTrigger className="bg-muted/40 border-0 h-10">
+                    <SelectValue placeholder="Seleccionar banco" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {parsers.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {parserActual && (
+                  <p className="text-xs text-muted-foreground">
+                    Formatos soportados: {parserActual.tipoArchivo.join(', ')}
+                  </p>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta ARS</Label>
+                  <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' ? '' : v)}>
+                    <SelectTrigger className="bg-muted/40 border-0 h-10">
+                      <SelectValue placeholder="Pesos argentinos" />
                     </SelectTrigger>
                     <SelectContent>
-                      {parsers.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          {p.nombre}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="_none">Sin cuenta ARS</SelectItem>
+                      {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
                     </SelectContent>
                   </Select>
-                  {parserActual && (
-                    <p className="text-xs text-muted-foreground">
-                      Formatos: {parserActual.tipoArchivo.join(', ')}
-                    </p>
-                  )}
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta USD</Label>
+                  <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' ? '' : v)}>
+                    <SelectTrigger className="bg-muted/40 border-0 h-10">
+                      <SelectValue placeholder="Dólares" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="_none">Sin cuenta USD</SelectItem>
+                      {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Cuenta ARS (pesos)</Label>
-                    <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' ? '' : v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar cuenta" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="_none">Sin cuenta ARS</SelectItem>
-                        {cuentas.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+              <label className="flex items-center gap-2.5 cursor-pointer group">
+                <input
+                  id="excluir-cargos"
+                  type="checkbox"
+                  checked={excluirCargos}
+                  onChange={(e) => setExcluirCargos(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-amber-500"
+                />
+                <div>
+                  <div className="text-sm font-medium group-hover:text-foreground transition-colors">
+                    Excluir cargos bancarios
                   </div>
-                  <div className="space-y-2">
-                    <Label>Cuenta USD (dólares)</Label>
-                    <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' ? '' : v)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar cuenta" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="_none">Sin cuenta USD</SelectItem>
-                        {cuentas.map((c) => (
-                          <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <div className="text-xs text-muted-foreground">IVA, percepciones, intereses financieros</div>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    id="excluir-cargos"
-                    type="checkbox"
-                    checked={excluirCargos}
-                    onChange={(e) => setExcluirCargos(e.target.checked)}
-                    className="h-4 w-4 rounded border-border"
-                  />
-                  <Label htmlFor="excluir-cargos" className="font-normal cursor-pointer">
-                    Excluir cargos bancarios (IVA, percepciones, intereses)
-                  </Label>
-                </div>
-              </CardContent>
-            </Card>
+              </label>
+            </div>
           )}
 
-          <div className="flex justify-end">
+          <div className="flex justify-end pt-1">
             <Button
               onClick={() => setPaso('upload')}
               disabled={modo === 'bancario' && (!parserId || (!cuentaARS && !cuentaUSD))}
+              className="gap-2 bg-foreground text-background hover:bg-foreground/85 px-6"
             >
-              Siguiente
+              Continuar <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
-      {/* Paso 1: Upload */}
+      {/* ── Paso 1: Upload ─────────────────────────────────── */}
       {paso === 'upload' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Subir archivo</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {modo === 'bancario' && parserActual && (
-              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg text-sm">
-                <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
-                <span>
-                  <span className="font-medium">{parserActual.nombre}</span>
-                  {' — '}formatos aceptados: {parserActual.tipoArchivo.join(', ')}
-                </span>
-              </div>
-            )}
-            <div
-              className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-accent/50 transition-colors"
-              onClick={() => fileRef.current?.click()}
-            >
-              <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">Click para seleccionar un archivo</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                {modo === 'bancario' && parserActual
-                  ? `${parserActual.tipoArchivo.join(', ')} — Máximo 10MB`
-                  : 'CSV, Excel (.xlsx, .xls) — Máximo 10MB'}
-              </p>
+        <div className="space-y-4 animate-slide-up-fade">
+          {modo === 'bancario' && parserActual && (
+            <div className="flex items-center gap-2 px-4 py-2.5 bg-muted/60 rounded-xl text-sm">
+              <Building2 className="h-4 w-4 text-muted-foreground shrink-0" />
+              <span className="text-muted-foreground">
+                <span className="text-foreground font-medium">{parserActual.nombre}</span>
+                {' '}— formatos: {parserActual.tipoArchivo.join(', ')}
+              </span>
             </div>
-            <input
-              ref={fileRef}
-              type="file"
-              accept={
-                modo === 'bancario' && parserActual
-                  ? parserActual.tipoArchivo.join(',')
-                  : '.csv,.xlsx,.xls'
+          )}
+
+          {/* Drop zone */}
+          <div
+            onClick={() => !loading && fileRef.current?.click()}
+            className={`
+              relative rounded-2xl border-2 border-dashed p-16 text-center
+              transition-all duration-200 group select-none
+              ${loading
+                ? 'border-amber-400/60 bg-amber-50/40 dark:bg-amber-950/10 cursor-wait'
+                : 'border-border hover:border-amber-400/60 hover:bg-amber-50/20 dark:hover:bg-amber-950/10 cursor-pointer'
               }
-              className="hidden"
-              onChange={handleFileChange}
+            `}
+          >
+            {/* Dot grid bg */}
+            <div className="absolute inset-0 rounded-2xl opacity-[0.04] pointer-events-none"
+              style={{ backgroundImage: 'radial-gradient(circle, currentColor 1px, transparent 1px)', backgroundSize: '20px 20px' }}
             />
-            {loading && <p className="text-sm text-muted-foreground">Procesando archivo...</p>}
-            <div className="flex justify-start">
-              <Button variant="outline" onClick={() => setPaso('modo')}>Volver</Button>
+
+            <div className="relative flex flex-col items-center gap-3">
+              {loading ? (
+                <>
+                  <div className="w-12 h-12 rounded-full border-2 border-amber-400/40 border-t-amber-500 animate-spin" />
+                  <p className="text-sm text-muted-foreground font-medium">Procesando archivo…</p>
+                </>
+              ) : (
+                <>
+                  <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center
+                    group-hover:bg-amber-500/10 transition-colors duration-200">
+                    <Upload className="h-6 w-6 text-muted-foreground group-hover:text-amber-600 transition-colors" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Arrastrá o hacé click para seleccionar</p>
+                    <p className="text-xs text-muted-foreground">
+                      {modo === 'bancario' && parserActual
+                        ? parserActual.tipoArchivo.join(', ')
+                        : 'CSV, Excel (.xlsx, .xls)'}
+                      {' '}— Máximo 10 MB
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          <input
+            ref={fileRef}
+            type="file"
+            accept={modo === 'bancario' && parserActual ? parserActual.tipoArchivo.join(',') : '.csv,.xlsx,.xls'}
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          <button
+            onClick={() => setPaso('modo')}
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            ← Volver
+          </button>
+        </div>
       )}
 
-      {/* Paso 2a: Mapeo genérico */}
+      {/* ── Paso 2a: Mapeo genérico ─────────────────────────── */}
       {paso === 'mapeo' && preview && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Mapear columnas</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Cuenta destino</Label>
-              <Select value={cuentaId || null} onValueChange={(v) => v && setCuentaId(v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar cuenta" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="space-y-6 animate-slide-up-fade">
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {(['fecha', 'monto', 'descripcion'] as const).map((campo) => (
-                <div key={campo} className="space-y-1">
-                  <Label className="capitalize">{campo} *</Label>
-                  <Select value={mapeo[campo]} onValueChange={(v) => v && setMapeo({ ...mapeo, [campo]: v })}>
-                    <SelectTrigger><SelectValue placeholder="Columna" /></SelectTrigger>
+          {/* Cuenta destino */}
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta destino</Label>
+            <Select value={cuentaId || null} onValueChange={(v) => v && setCuentaId(v)}>
+              <SelectTrigger className="h-10 bg-muted/40 border-0">
+                <SelectValue placeholder="Seleccionar cuenta" />
+              </SelectTrigger>
+              <SelectContent>
+                {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Mapeo de columnas */}
+          <div className="rounded-2xl border border-border overflow-hidden">
+            <div className="px-4 py-3 bg-muted/40 border-b border-border">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Mapeo de columnas <span className="text-muted-foreground/60 normal-case font-normal">— asigná las columnas del archivo a cada campo</span>
+              </p>
+            </div>
+            <div className="p-4 space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {(['fecha', 'monto', 'descripcion'] as const).map((campo) => (
+                  <div key={campo} className="space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs font-semibold capitalize">{campo}</span>
+                      <span className="text-[10px] text-amber-600 font-bold">*</span>
+                    </div>
+                    <Select value={mapeo[campo]} onValueChange={(v) => v && setMapeo({ ...mapeo, [campo]: v })}>
+                      <SelectTrigger className="h-9 bg-muted/40 border-0 text-sm">
+                        <SelectValue placeholder="columna…" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {preview.columnas.map((col) => (
+                          <SelectItem key={col} value={col}>{col}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                ))}
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-1">
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Formato fecha</Label>
+                  <Select value={formatoFecha} onValueChange={(v) => v && setFormatoFecha(v)}>
+                    <SelectTrigger className="h-9 bg-muted/40 border-0 text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      {preview.columnas.map((col) => <SelectItem key={col} value={col}>{col}</SelectItem>)}
+                      <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
+                      <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
+                      <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
+                      <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <Label>Formato fecha</Label>
-                <Select value={formatoFecha} onValueChange={(v) => v && setFormatoFecha(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                    <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                    <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                    <SelectItem value="DD-MM-YYYY">DD-MM-YYYY</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label>Separador decimal</Label>
-                <Select value={separadorDecimal} onValueChange={(v) => v && setSeparadorDecimal(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value=".">Punto (.)</SelectItem>
-                    <SelectItem value=",">Coma (,)</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Separador decimal</Label>
+                  <Select value={separadorDecimal} onValueChange={(v) => v && setSeparadorDecimal(v)}>
+                    <SelectTrigger className="h-9 bg-muted/40 border-0 text-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value=".">Punto ( . )</SelectItem>
+                      <SelectItem value=",">Coma ( , )</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="overflow-x-auto border rounded-lg">
-              <table className="w-full text-sm">
-                <thead className="bg-muted">
-                  <tr>
+          {/* Preview table */}
+          <div className="rounded-2xl border border-border overflow-hidden">
+            <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Vista previa
+              </p>
+              <span className="text-xs text-muted-foreground tabular-nums">{preview.totalFilas} filas</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border">
                     {preview.columnas.map((col) => (
-                      <th key={col} className="px-3 py-2 text-left font-medium">{col}</th>
+                      <th key={col} className="px-4 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide whitespace-nowrap">
+                        {col}
+                      </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {preview.filas.slice(0, 5).map((fila, i) => (
-                    <tr key={i} className="border-t">
+                    <tr key={i} className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
                       {preview.columnas.map((col) => (
-                        <td key={col} className="px-3 py-1.5 truncate max-w-[200px]">{fila[col]}</td>
+                        <td key={col} className="px-4 py-2.5 truncate max-w-[180px] text-foreground/80">
+                          {fila[col]}
+                        </td>
                       ))}
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
-            <p className="text-xs text-muted-foreground">{preview.totalFilas} filas totales</p>
+          </div>
 
-            <div className="flex gap-2 justify-end">
-              <Button variant="outline" onClick={reset}>Cancelar</Button>
-              <Button
-                onClick={handleImportarGenerico}
-                disabled={loading || !cuentaId || !mapeo.fecha || !mapeo.monto || !mapeo.descripcion}
-              >
-                {loading ? 'Importando...' : 'Importar'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Paso 2b: Preview bancario */}
-      {paso === 'preview-bancario' && previewBancario && (
-        <div className="space-y-4">
-          {/* Resumen */}
-          <Card>
-            <CardContent className="pt-4">
-              <div className="flex flex-wrap gap-4 items-center">
-                <div>
-                  <div className="text-2xl font-bold">{previewBancario.totalTransacciones}</div>
-                  <div className="text-xs text-muted-foreground">transacciones</div>
-                </div>
-                {previewBancario.metadatos.periodo && (
-                  <div>
-                    <div className="text-lg font-semibold">{previewBancario.metadatos.periodo}</div>
-                    <div className="text-xs text-muted-foreground">período</div>
-                  </div>
-                )}
-                {previewBancario.metadatos.filasExcluidas > 0 && excluirCargos && (
-                  <div className="ml-auto">
-                    <Badge variant="secondary">
-                      {previewBancario.metadatos.filasExcluidas} cargos bancarios excluidos
-                    </Badge>
-                  </div>
-                )}
-              </div>
-
-              {/* Breakdown por moneda */}
-              {(() => {
-                const porMoneda = previewBancario.transacciones.reduce<Record<string, number>>((acc, t) => {
-                  if (!t.excluida) acc[t.moneda] = (acc[t.moneda] ?? 0) + 1
-                  return acc
-                }, {})
-                return Object.keys(porMoneda).length > 0 ? (
-                  <div className="flex gap-2 mt-3 flex-wrap">
-                    {Object.entries(porMoneda).map(([moneda, count]) => (
-                      <Badge key={moneda} variant="outline">{count} en {moneda}</Badge>
-                    ))}
-                    <span className="text-xs text-muted-foreground self-center">(de las primeras 10 mostradas)</span>
-                  </div>
-                ) : null
-              })()}
-            </CardContent>
-          </Card>
-
-          {/* Tabla preview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">
-                Primeras {previewBancario.transacciones.length} transacciones (preview)
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="px-3 py-2 text-left font-medium">Fecha</th>
-                      <th className="px-3 py-2 text-left font-medium">Descripción</th>
-                      <th className="px-3 py-2 text-right font-medium">Monto</th>
-                      <th className="px-3 py-2 text-center font-medium">Moneda</th>
-                      <th className="px-3 py-2 text-left font-medium">Notas</th>
-                      <th className="px-3 py-2 text-center font-medium">Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previewBancario.transacciones.map((t, i) => (
-                      <tr key={i} className={`border-t ${t.excluida ? 'opacity-40' : ''}`}>
-                        <td className="px-3 py-2 whitespace-nowrap">
-                          {new Date(t.fecha).toLocaleDateString('es-AR')}
-                        </td>
-                        <td className="px-3 py-2 max-w-[220px] truncate">{t.descripcion}</td>
-                        <td className="px-3 py-2 text-right font-mono tabular-nums">
-                          {t.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                        </td>
-                        <td className="px-3 py-2 text-center">
-                          <Badge variant={t.moneda === 'USD' ? 'default' : 'secondary'} className="text-xs">
-                            {t.moneda}
-                          </Badge>
-                        </td>
-                        <td className="px-3 py-2 text-muted-foreground">{t.notas ?? '—'}</td>
-                        <td className="px-3 py-2 text-center">
-                          {t.excluida ? (
-                            <span className="text-xs text-muted-foreground">Excluida</span>
-                          ) : (
-                            <span className="text-xs text-green-600">✓</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={reset}>Cancelar</Button>
-            <Button onClick={handleImportarBancario} disabled={loading}>
-              {loading
-                ? 'Importando...'
-                : `Importar ${previewBancario.totalTransacciones - (excluirCargos ? previewBancario.metadatos.filasExcluidas : 0)} transacciones`}
+          <div className="flex gap-3 justify-between">
+            <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              ← Cancelar
+            </button>
+            <Button
+              onClick={handleImportarGenerico}
+              disabled={loading || !cuentaId || !mapeo.fecha || !mapeo.monto || !mapeo.descripcion}
+              className="gap-2 bg-foreground text-background hover:bg-foreground/85 px-6"
+            >
+              {loading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border border-background/40 border-t-background rounded-full animate-spin" />
+                  Importando…
+                </>
+              ) : (
+                <>Importar {preview.totalFilas} filas <ArrowRight className="h-3.5 w-3.5" /></>
+              )}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Paso 3: Resultado */}
-      {paso === 'resultado' && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Importacion completada
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {resultadoBancario ? (
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <div className="p-3 bg-muted rounded-lg">
-                    <div className="text-2xl font-bold">{resultadoBancario.importadas}</div>
-                    <div className="text-xs text-muted-foreground">importadas</div>
-                  </div>
-                  {resultadoBancario.excluidas > 0 && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <div className="text-2xl font-bold">{resultadoBancario.excluidas}</div>
+      {/* ── Paso 2b: Preview bancario ───────────────────────── */}
+      {paso === 'preview-bancario' && previewBancario && (
+        <div className="space-y-5 animate-slide-up-fade">
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="rounded-2xl border border-border p-4 space-y-0.5">
+              <div className="text-2xl font-bold tabular-nums">{previewBancario.totalTransacciones}</div>
+              <div className="text-xs text-muted-foreground">transacciones</div>
+            </div>
+            {previewBancario.metadatos.periodo && (
+              <div className="rounded-2xl border border-border p-4 space-y-0.5">
+                <div className="text-lg font-bold">{previewBancario.metadatos.periodo}</div>
+                <div className="text-xs text-muted-foreground">período</div>
+              </div>
+            )}
+            {(() => {
+              const total = previewBancario.transacciones
+              const ars = total.filter(t => t.moneda === 'ARS' && !t.excluida).length
+              const usd = total.filter(t => t.moneda === 'USD' && !t.excluida).length
+              return (
+                <>
+                  {ars > 0 && (
+                    <div className="rounded-2xl border border-border p-4 space-y-0.5">
+                      <div className="text-2xl font-bold tabular-nums">{previewBancario.totalTransacciones - (excluirCargos ? previewBancario.metadatos.filasExcluidas : 0)}</div>
+                      <div className="text-xs text-muted-foreground">a importar</div>
+                    </div>
+                  )}
+                  {excluirCargos && previewBancario.metadatos.filasExcluidas > 0 && (
+                    <div className="rounded-2xl border border-dashed border-border p-4 space-y-0.5 opacity-60">
+                      <div className="text-2xl font-bold tabular-nums">{previewBancario.metadatos.filasExcluidas}</div>
                       <div className="text-xs text-muted-foreground">cargos excluidos</div>
                     </div>
                   )}
-                  {resultadoBancario.periodo && (
-                    <div className="p-3 bg-muted rounded-lg">
-                      <div className="text-lg font-semibold">{resultadoBancario.periodo}</div>
-                      <div className="text-xs text-muted-foreground">período</div>
-                    </div>
-                  )}
-                </div>
-                {Object.keys(resultadoBancario.porCuenta).length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {Object.entries(resultadoBancario.porCuenta).map(([moneda, count]) => (
-                      <Badge key={moneda} variant="outline">{count} en {moneda}</Badge>
-                    ))}
-                  </div>
-                )}
-                {resultadoBancario.errores.length > 0 && (
-                  <div className="text-sm text-muted-foreground">
-                    {resultadoBancario.errores.length} filas con errores omitidas
-                  </div>
-                )}
+                </>
+              )
+            })()}
+          </div>
+
+          {/* Tabla */}
+          <div className="rounded-2xl border border-border overflow-hidden">
+            <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Vista previa — primeras {previewBancario.transacciones.length} transacciones
+              </p>
+              <div className="flex gap-1.5">
+                {['ARS', 'USD'].map(m => {
+                  const count = previewBancario.transacciones.filter(t => t.moneda === m && !t.excluida).length
+                  if (!count) return null
+                  return (
+                    <span key={m} className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-medium">
+                      {count} {m}
+                    </span>
+                  )
+                })}
               </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Importacion completada correctamente.</p>
-            )}
-            <Button onClick={reset}>Importar otro archivo</Button>
-          </CardContent>
-        </Card>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="px-4 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide">Fecha</th>
+                    <th className="px-4 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide">Descripción</th>
+                    <th className="px-4 py-2.5 text-right font-semibold text-muted-foreground uppercase tracking-wide">Monto</th>
+                    <th className="px-4 py-2.5 text-center font-semibold text-muted-foreground uppercase tracking-wide">Moneda</th>
+                    <th className="px-4 py-2.5 text-left font-semibold text-muted-foreground uppercase tracking-wide">Notas</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {previewBancario.transacciones.map((t, i) => (
+                    <tr
+                      key={i}
+                      className={`
+                        border-b border-border/50 last:border-0 transition-colors
+                        ${t.excluida
+                          ? 'opacity-30'
+                          : i % 2 !== 0 ? 'bg-muted/20' : ''
+                        }
+                      `}
+                    >
+                      <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground tabular-nums">
+                        {new Date(t.fecha).toLocaleDateString('es-AR')}
+                      </td>
+                      <td className="px-4 py-2.5 max-w-[200px] truncate">
+                        {t.excluida && <Ban className="inline h-3 w-3 mr-1 text-muted-foreground" />}
+                        {t.descripcion}
+                      </td>
+                      <td className="px-4 py-2.5 text-right font-mono tabular-nums font-medium">
+                        {t.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+                      </td>
+                      <td className="px-4 py-2.5 text-center">
+                        <span className={`
+                          inline-block text-[10px] px-2 py-0.5 rounded-full font-semibold
+                          ${t.moneda === 'USD'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
+                          }
+                        `}>
+                          {t.moneda}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-muted-foreground italic">
+                        {t.notas ?? '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <button onClick={reset} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+              ← Cancelar
+            </button>
+            <Button
+              onClick={handleImportarBancario}
+              disabled={loading}
+              className="gap-2 bg-foreground text-background hover:bg-foreground/85 px-6"
+            >
+              {loading ? (
+                <>
+                  <div className="w-3.5 h-3.5 border border-background/40 border-t-background rounded-full animate-spin" />
+                  Importando…
+                </>
+              ) : (
+                <>
+                  Importar {previewBancario.totalTransacciones - (excluirCargos ? previewBancario.metadatos.filasExcluidas : 0)} transacciones
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Paso 3: Resultado ──────────────────────────────── */}
+      {paso === 'resultado' && (
+        <div className="animate-slide-up-fade space-y-6">
+          {/* Success header */}
+          <div className="rounded-2xl border border-green-200 dark:border-green-900/60 bg-green-50/60 dark:bg-green-950/20 p-6 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-green-500/15 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <div className="font-semibold text-green-900 dark:text-green-300">Importación completada</div>
+              <div className="text-sm text-green-700/70 dark:text-green-400/60 mt-0.5">
+                Las transacciones fueron agregadas y los balances actualizados.
+              </div>
+            </div>
+          </div>
+
+          {/* Stats del resultado */}
+          {resultadoBancario && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="rounded-2xl border border-border p-4 space-y-0.5">
+                <div className="text-3xl font-bold tabular-nums">{resultadoBancario.importadas}</div>
+                <div className="text-xs text-muted-foreground">transacciones importadas</div>
+              </div>
+              {resultadoBancario.excluidas > 0 && (
+                <div className="rounded-2xl border border-dashed border-border p-4 space-y-0.5 opacity-60">
+                  <div className="text-3xl font-bold tabular-nums">{resultadoBancario.excluidas}</div>
+                  <div className="text-xs text-muted-foreground">cargos excluidos</div>
+                </div>
+              )}
+              {resultadoBancario.periodo && (
+                <div className="rounded-2xl border border-border p-4 space-y-0.5">
+                  <div className="text-xl font-bold">{resultadoBancario.periodo}</div>
+                  <div className="text-xs text-muted-foreground">período importado</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Breakdown por moneda */}
+          {resultadoBancario && Object.keys(resultadoBancario.porCuenta).length > 0 && (
+            <div className="flex gap-2 flex-wrap">
+              {Object.entries(resultadoBancario.porCuenta).map(([moneda, count]) => (
+                <span
+                  key={moneda}
+                  className={`
+                    text-xs px-3 py-1.5 rounded-full font-medium
+                    ${moneda === 'USD'
+                      ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
+                      : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
+                    }
+                  `}
+                >
+                  {count} transacciones en {moneda}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {resultadoBancario?.errores && resultadoBancario.errores.length > 0 && (
+            <p className="text-xs text-muted-foreground">
+              {resultadoBancario.errores.length} filas con errores fueron omitidas.
+            </p>
+          )}
+
+          <div className="flex gap-3">
+            <Button
+              onClick={reset}
+              className="bg-foreground text-background hover:bg-foreground/85"
+            >
+              Importar otro archivo
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   )
