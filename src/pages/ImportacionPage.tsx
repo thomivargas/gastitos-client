@@ -1,12 +1,18 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   Upload, Download, FileSpreadsheet, Building2, Table2,
-  CheckCircle2, ArrowRight, X, FileText, Ban
+  CheckCircle2, ArrowRight, X, FileText, Ban, HelpCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
 import {
   Select,
   SelectTrigger,
@@ -393,6 +399,69 @@ export default function ImportacionPage() {
               </label>
             </div>
           )}
+
+          {/* Acordeón de ayuda */}
+          <div className="rounded-2xl border border-border overflow-hidden">
+            <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center gap-2">
+              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                ¿Cómo funciona?
+              </span>
+            </div>
+            <Accordion type="multiple" className="divide-y divide-border">
+              <AccordionItem value="importar-csv" className="border-0 px-4">
+                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
+                  Importar CSV / Excel genérico
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
+                  <p>Usá este modo si tenés cualquier archivo CSV o Excel exportado de otro sistema.</p>
+                  <ol className="list-decimal list-inside space-y-1 text-xs leading-relaxed">
+                    <li>Seleccioná <strong className="text-foreground">CSV / Excel genérico</strong> y hacé click en Continuar.</li>
+                    <li>Subí el archivo — se muestran las primeras filas para que puedas verificarlo.</li>
+                    <li>Mapeá las columnas: indicá cuál es la fecha, el monto y la descripción.</li>
+                    <li>Elegí la cuenta destino y hacé click en Importar.</li>
+                  </ol>
+                  <p className="text-xs">El separador decimal y el formato de fecha se detectan automáticamente, pero podés ajustarlos.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="importar-banco" className="border-0 px-4">
+                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
+                  Importar resumen bancario (BBVA)
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
+                  <p>Descargá el resumen de tu tarjeta de crédito BBVA desde el homebanking en formato <span className="font-mono text-xs bg-muted px-1 py-0.5 rounded">.xls</span>.</p>
+                  <ol className="list-decimal list-inside space-y-1 text-xs leading-relaxed">
+                    <li>Seleccioná <strong className="text-foreground">Resumen bancario</strong> y elegí el banco.</li>
+                    <li>Configurá la cuenta ARS para pesos y/o la cuenta USD para dólares.</li>
+                    <li>Activá <strong className="text-foreground">Excluir cargos bancarios</strong> para omitir IVA, percepciones e intereses.</li>
+                    <li>Subí el archivo — se muestra un preview con las primeras 10 transacciones.</li>
+                    <li>Confirmá la importación. Las transacciones en ARS y USD se asignan a cada cuenta automáticamente.</li>
+                  </ol>
+                  <p className="text-xs">Las cuotas ("2/3") se guardan en el campo de notas de cada transacción.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="exportar" className="border-0 px-4">
+                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
+                  Exportar transacciones
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
+                  <p>El botón <strong className="text-foreground">Exportar</strong> (arriba a la derecha) descarga todas tus transacciones en formato CSV.</p>
+                  <p className="text-xs">El archivo incluye: fecha, tipo, monto, moneda, descripción, categoría, cuenta y notas. Podés abrirlo en Excel o Google Sheets.</p>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="plantilla" className="border-0 px-4">
+                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
+                  ¿Para qué sirve la Plantilla?
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-muted-foreground pb-4">
+                  <p>Descarga un CSV de ejemplo con el formato que espera el importador genérico. Útil si querés cargar transacciones manualmente o adaptar datos de otro sistema al formato de Gastitos.</p>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
 
           <div className="flex justify-end pt-1">
             <Button
