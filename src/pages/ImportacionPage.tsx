@@ -14,6 +14,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
   Select,
   SelectTrigger,
   SelectValue,
@@ -245,6 +252,154 @@ export default function ImportacionPage() {
             <Download className="h-3.5 w-3.5" />
             <span className="hidden sm:inline">Exportar</span>
           </button>
+
+          {/* Ayuda */}
+          <Dialog>
+            <DialogTrigger asChild>
+              <button
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+                  border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
+                  transition-colors duration-150"
+                aria-label="Ayuda"
+              >
+                <HelpCircle className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Ayuda</span>
+              </button>
+            </DialogTrigger>
+            <DialogContent
+              className="
+                sm:max-w-lg w-full max-h-[90vh] overflow-y-auto
+                !bg-white !text-[#0a0a0a] !ring-black/10
+                p-0
+              "
+            >
+              {/* Header del modal */}
+              <div className="sticky top-0 z-10 bg-white border-b border-[#e5e5e5] px-6 pt-6 pb-4">
+                <DialogHeader>
+                  <DialogTitle className="text-base font-semibold text-[#0a0a0a] flex items-center gap-2">
+                    <HelpCircle className="h-4 w-4 text-[#737373]" />
+                    ¿Cómo funciona Importar / Exportar?
+                  </DialogTitle>
+                  <p className="text-xs text-[#737373] mt-0.5">
+                    Todo lo que necesitás saber para mover tus transacciones.
+                  </p>
+                </DialogHeader>
+              </div>
+
+              {/* Contenido scrollable */}
+              <div
+                className="px-2 pb-4"
+                style={{ '--muted-foreground': '#525252', '--foreground': '#0a0a0a', '--border': '#e5e5e5', '--muted': '#f5f5f5' } as React.CSSProperties}
+              >
+                <Accordion type="multiple" defaultValue={['importar-csv']} className="divide-y divide-[#e5e5e5]">
+
+                  <AccordionItem value="importar-csv" className="border-0 px-4">
+                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                          <Table2 className="h-3.5 w-3.5 text-[#525252]" />
+                        </div>
+                        CSV / Excel genérico
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 px-0">
+                      <div className="ml-8 space-y-3 text-[#525252]">
+                        <p className="text-sm">Usá este modo si tenés cualquier archivo CSV o Excel exportado de otro sistema.</p>
+                        <ol className="space-y-2">
+                          {[
+                            <>Seleccioná <strong className="text-[#0a0a0a] font-medium">CSV / Excel genérico</strong> y hacé click en Continuar.</>,
+                            <>Subí el archivo — se muestran las primeras filas para verificarlo.</>,
+                            <>Mapeá las columnas: indicá cuál es la <strong className="text-[#0a0a0a] font-medium">fecha</strong>, el <strong className="text-[#0a0a0a] font-medium">monto</strong> y la <strong className="text-[#0a0a0a] font-medium">descripción</strong>.</>,
+                            <>Elegí la cuenta destino y hacé click en <strong className="text-[#0a0a0a] font-medium">Importar</strong>.</>,
+                          ].map((step, i) => (
+                            <li key={i} className="flex gap-3 text-xs leading-relaxed">
+                              <span className="w-4 h-4 rounded-full bg-[#e5e5e5] text-[#525252] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ol>
+                        <p className="text-xs text-[#737373] bg-[#f5f5f5] rounded-lg px-3 py-2">
+                          El separador decimal y el formato de fecha se detectan automáticamente, pero podés ajustarlos manualmente.
+                        </p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="importar-banco" className="border-0 px-4">
+                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                          <Building2 className="h-3.5 w-3.5 text-[#525252]" />
+                        </div>
+                        Resumen bancario (BBVA)
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 px-0">
+                      <div className="ml-8 space-y-3 text-[#525252]">
+                        <p className="text-sm">
+                          Descargá el resumen de tu tarjeta BBVA desde el homebanking en formato{' '}
+                          <span className="font-mono text-xs bg-[#f5f5f5] text-[#0a0a0a] px-1.5 py-0.5 rounded border border-[#e5e5e5]">.xls</span>.
+                        </p>
+                        <ol className="space-y-2">
+                          {[
+                            <>Seleccioná <strong className="text-[#0a0a0a] font-medium">Resumen bancario</strong> y elegí el banco.</>,
+                            <>Configurá la <strong className="text-[#0a0a0a] font-medium">cuenta ARS</strong> para pesos y/o la <strong className="text-[#0a0a0a] font-medium">cuenta USD</strong> para dólares.</>,
+                            <>Activá <strong className="text-[#0a0a0a] font-medium">Excluir cargos bancarios</strong> para omitir IVA, percepciones e intereses.</>,
+                            <>Subí el archivo — se muestra un preview con las primeras 10 transacciones.</>,
+                            <>Confirmá la importación. ARS y USD se asignan a cada cuenta automáticamente.</>,
+                          ].map((step, i) => (
+                            <li key={i} className="flex gap-3 text-xs leading-relaxed">
+                              <span className="w-4 h-4 rounded-full bg-[#e5e5e5] text-[#525252] flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5">{i + 1}</span>
+                              <span>{step}</span>
+                            </li>
+                          ))}
+                        </ol>
+                        <p className="text-xs text-[#737373] bg-[#f5f5f5] rounded-lg px-3 py-2">
+                          Las cuotas ("2/3") se guardan en el campo de notas de cada transacción.
+                        </p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="exportar" className="border-0 px-4">
+                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                          <Download className="h-3.5 w-3.5 text-[#525252]" />
+                        </div>
+                        Exportar transacciones
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 px-0">
+                      <div className="ml-8 space-y-2 text-[#525252] text-sm">
+                        <p>El botón <strong className="text-[#0a0a0a] font-medium">Exportar</strong> (arriba a la derecha) descarga todas tus transacciones en formato CSV.</p>
+                        <p className="text-xs text-[#737373] bg-[#f5f5f5] rounded-lg px-3 py-2">
+                          Incluye: fecha, tipo, monto, moneda, descripción, categoría, cuenta y notas. Abrilo en Excel o Google Sheets.
+                        </p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="plantilla" className="border-0 px-4">
+                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                          <FileSpreadsheet className="h-3.5 w-3.5 text-[#525252]" />
+                        </div>
+                        ¿Para qué sirve la Plantilla?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4 px-0">
+                      <div className="ml-8 text-[#525252] text-sm">
+                        <p>Descarga un CSV de ejemplo con el formato que espera el importador genérico. Útil si querés cargar transacciones manualmente o adaptar datos de otro sistema al formato de Gastitos.</p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                </Accordion>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
@@ -399,69 +554,6 @@ export default function ImportacionPage() {
               </label>
             </div>
           )}
-
-          {/* Acordeón de ayuda */}
-          <div className="rounded-2xl border border-border overflow-hidden">
-            <div className="px-4 py-3 bg-muted/40 border-b border-border flex items-center gap-2">
-              <HelpCircle className="h-3.5 w-3.5 text-muted-foreground" />
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                ¿Cómo funciona?
-              </span>
-            </div>
-            <Accordion type="multiple" className="divide-y divide-border">
-              <AccordionItem value="importar-csv" className="border-0 px-4">
-                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
-                  Importar CSV / Excel genérico
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
-                  <p>Usá este modo si tenés cualquier archivo CSV o Excel exportado de otro sistema.</p>
-                  <ol className="list-decimal list-inside space-y-1 text-xs leading-relaxed">
-                    <li>Seleccioná <strong className="text-foreground">CSV / Excel genérico</strong> y hacé click en Continuar.</li>
-                    <li>Subí el archivo — se muestran las primeras filas para que puedas verificarlo.</li>
-                    <li>Mapeá las columnas: indicá cuál es la fecha, el monto y la descripción.</li>
-                    <li>Elegí la cuenta destino y hacé click en Importar.</li>
-                  </ol>
-                  <p className="text-xs">El separador decimal y el formato de fecha se detectan automáticamente, pero podés ajustarlos.</p>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="importar-banco" className="border-0 px-4">
-                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
-                  Importar resumen bancario (BBVA)
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
-                  <p>Descargá el resumen de tu tarjeta de crédito BBVA desde el homebanking en formato <span className="font-mono text-xs bg-muted px-1 py-0.5 rounded">.xls</span>.</p>
-                  <ol className="list-decimal list-inside space-y-1 text-xs leading-relaxed">
-                    <li>Seleccioná <strong className="text-foreground">Resumen bancario</strong> y elegí el banco.</li>
-                    <li>Configurá la cuenta ARS para pesos y/o la cuenta USD para dólares.</li>
-                    <li>Activá <strong className="text-foreground">Excluir cargos bancarios</strong> para omitir IVA, percepciones e intereses.</li>
-                    <li>Subí el archivo — se muestra un preview con las primeras 10 transacciones.</li>
-                    <li>Confirmá la importación. Las transacciones en ARS y USD se asignan a cada cuenta automáticamente.</li>
-                  </ol>
-                  <p className="text-xs">Las cuotas ("2/3") se guardan en el campo de notas de cada transacción.</p>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="exportar" className="border-0 px-4">
-                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
-                  Exportar transacciones
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground space-y-2 pb-4">
-                  <p>El botón <strong className="text-foreground">Exportar</strong> (arriba a la derecha) descarga todas tus transacciones en formato CSV.</p>
-                  <p className="text-xs">El archivo incluye: fecha, tipo, monto, moneda, descripción, categoría, cuenta y notas. Podés abrirlo en Excel o Google Sheets.</p>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="plantilla" className="border-0 px-4">
-                <AccordionTrigger className="text-sm py-3 hover:no-underline font-medium">
-                  ¿Para qué sirve la Plantilla?
-                </AccordionTrigger>
-                <AccordionContent className="text-sm text-muted-foreground pb-4">
-                  <p>Descarga un CSV de ejemplo con el formato que espera el importador genérico. Útil si querés cargar transacciones manualmente o adaptar datos de otro sistema al formato de Gastitos.</p>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-          </div>
 
           <div className="flex justify-end pt-1">
             <Button
