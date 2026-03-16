@@ -213,7 +213,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Auth background pattern */
+/* Auth background patterns */
 .auth-pattern {
   background-image: radial-gradient(oklch(0.8 0.05 250 / 20%) 1px, transparent 1px);
   background-size: 24px 24px;
@@ -221,4 +221,23 @@
 
 .dark .auth-pattern {
   background-image: radial-gradient(oklch(0.4 0.05 250 / 15%) 1px, transparent 1px);
+}
+
+.auth-grid-pattern {
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Auth floating animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-12px) rotate(3deg); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(15px, -10px) scale(1.05); }
+  66% { transform: translate(-10px, 8px) scale(0.95); }
 }
