@@ -127,6 +127,17 @@
     @apply font-sans;
     scroll-behavior: smooth;
     }
+
+  /* Calendar icon color for date inputs */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+    cursor: pointer;
+  }
+
+  .dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 }
 
 /* Animaciones globales */
