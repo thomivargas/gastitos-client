@@ -75,7 +75,8 @@ export interface PreviewBancarioData {
 
 export interface ConfigImportBancario {
   parserId: string
-  cuentas: Record<string, string> // { ARS: uuid, USD: uuid }
+  cuentaId: string
+  tipoCambioUsd?: 'tarjeta' | 'blue' | 'mep' | 'oficial'
   aplicarReglas?: boolean
   excluirCargosBancarios?: boolean
   fechaResumen?: string // YYYY-MM-DD, primer día del período del resumen
@@ -84,10 +85,10 @@ export interface ConfigImportBancario {
 export interface ResultadoBancario {
   importadas: number
   excluidas: number
+  convertidas: number
   errores: { fila: number; error: string }[]
   totalFilas: number
   periodo?: string
-  porCuenta: Record<string, number>
 }
 
 export async function listarParsers() {

@@ -1,161 +1,204 @@
-import { useState } from 'react'
 import { useParams, useNavigate, Navigate } from 'react-router'
-import { ArrowLeft, Pencil, Archive, RotateCcw, Trash2 } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { ArrowLeft, Pencil, AlertTriangle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { CuentaForm } from '@/components/cuentas/CuentaForm'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
-import { useCuenta, useArchivarCuenta, useReactivarCuenta, useEliminarCuenta } from '@/hooks/use-cuentas'
+import { useCuenta, useEliminarCuenta } from '@/hooks/use-cuentas'
+import { useTransacciones } from '@/hooks/use-transacciones'
 import { TIPOS_CUENTA } from '@/lib/constants'
-import { formatMonto, formatFecha } from '@/lib/formatters'
+import { formatMonto } from '@/lib/formatters'
 
 export default function CuentaDetallePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const [formOpen, setFormOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
+
+  const { data: cuenta, isLoading } = useCuenta(id ?? '')
+  const eliminar = useEliminarCuenta()
+
+  // Fecha del primer día del mes actual
+  const primerDiaMes = useMemo(() => {
+    const hoy = new Date()
+    return `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, '0')}-01`
+  }, [])
+
+  const { data: transaccionesData } = useTransacciones({
+    cuentaId: id ?? '',
+    fechaDesde: primerDiaMes,
+    limit: 200,
+  })
+
+  const { data: ultimasData } = useTransacciones({
+    cuentaId: id ?? '',
+    limit: 10,
+    ordenarPor: 'fecha',
+    orden: 'desc',
+  })
 
   if (!id) return <Navigate to="/cuentas" replace />
 
-  const { data: cuenta, isLoading } = useCuenta(id)
-  const [formOpen, setFormOpen] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const archivar = useArchivarCuenta()
-  const reactivar = useReactivarCuenta()
-  const eliminar = useEliminarCuenta()
+  // Stats del mes
+  const stats = useMemo(() => {
+    const txs = transaccionesData?.data ?? []
+    const ingresos = txs
+      .filter((t) => t.tipo === 'INGRESO')
+      .reduce((sum, t) => sum + t.monto, 0)
+    const gastos = txs
+      .filter((t) => t.tipo === 'GASTO')
+      .reduce((sum, t) => sum + t.monto, 0)
+    return { ingresos, gastos, cantidad: txs.length }
+  }, [transaccionesData])
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse bg-muted rounded" />
-        <div className="h-64 animate-pulse bg-muted rounded-lg" />
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 w-32 bg-muted rounded" />
+        <div className="h-40 bg-muted rounded-2xl" />
       </div>
     )
   }
 
-  if (!cuenta) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-muted-foreground">Cuenta no encontrada</p>
-        <Button variant="link" onClick={() => navigate('/cuentas')}>Volver a cuentas</Button>
-      </div>
-    )
-  }
+  if (!cuenta) return null
 
-  const tipoInfo = TIPOS_CUENTA[cuenta.tipo]
-  const isArchivada = cuenta.estado === 'ARCHIVADA'
-  const balanceColor = cuenta.balance >= 0 ? 'text-green-600' : 'text-red-500'
-
+  const balance = Number(cuenta.balance)
+  const isPasivo = cuenta.clasificacion === 'PASIVO'
+  const balanceColor =
+    (!isPasivo && balance >= 0) || (isPasivo && balance < 0)
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-red-500 dark:text-red-400'
+  const tipoCuentaInfo = TIPOS_CUENTA[cuenta.tipo]
   function handleEliminar() {
     eliminar.mutate(cuenta!.id, {
       onSuccess: () => navigate('/cuentas'),
     })
-    setConfirmOpen(false)
   }
 
   return (
-    <div className="space-y-6 page-transition">
-      <div className="flex items-start gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/cuentas')} className="shrink-0 mt-0.5">
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-2xl font-bold truncate">{cuenta.nombre}</h1>
-            {isArchivada && <Badge variant="secondary">Archivada</Badge>}
-          </div>
-          <p className="text-sm text-muted-foreground">{tipoInfo.label}</p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => setFormOpen(true)}>
-            <Pencil className="h-4 w-4" />
+    <div className="space-y-6">
+      {/* Navegación */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate('/cuentas')}>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => setFormOpen(true)}>
+          <h1 className="text-xl font-semibold">{cuenta.nombre}</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => setFormOpen(true)}>
             <Pencil className="h-4 w-4 mr-1" />
             Editar
           </Button>
-          {isArchivada ? (
-            <>
-              <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => reactivar.mutate(cuenta.id)}>
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => reactivar.mutate(cuenta.id)}>
-                <RotateCcw className="h-4 w-4 mr-1" />
-                Reactivar
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="outline" size="icon" className="sm:hidden h-8 w-8" onClick={() => archivar.mutate(cuenta.id)}>
-                <Archive className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" className="hidden sm:inline-flex" onClick={() => archivar.mutate(cuenta.id)}>
-                <Archive className="h-4 w-4 mr-1" />
-                Archivar
-              </Button>
-            </>
-          )}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Balance actual</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-3xl font-bold ${balanceColor}`}>
-              {formatMonto(cuenta.balance, cuenta.moneda)}
+      {/* Sección 1: Hero */}
+      <div
+        className="rounded-2xl p-6"
+        style={{ backgroundColor: (cuenta.color || '#6172F3') + '18' }}
+      >
+        <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+          {tipoCuentaInfo?.label ?? cuenta.tipo}
+        </p>
+        {cuenta.institucion && (
+          <p className="text-sm text-muted-foreground mt-0.5">{cuenta.institucion.nombre}</p>
+        )}
+        <p className={`text-4xl font-bold tabular-nums mt-3 ${balanceColor}`}>
+          {formatMonto(balance, cuenta.moneda)}
+        </p>
+        {cuenta.notas && (
+          <p className="text-sm text-muted-foreground mt-3">{cuenta.notas}</p>
+        )}
+      </div>
+
+      {/* Sección 2: Stats del mes */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+            Ingresos del mes
+          </p>
+          <p className="text-lg font-bold tabular-nums text-green-600 dark:text-green-400 mt-1">
+            {formatMonto(stats.ingresos, cuenta.moneda)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+            Gastos del mes
+          </p>
+          <p className="text-lg font-bold tabular-nums text-red-500 dark:text-red-400 mt-1">
+            {formatMonto(stats.gastos, cuenta.moneda)}
+          </p>
+        </div>
+        <div className="rounded-xl border border-border p-4">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+            Transacciones
+          </p>
+          <p className="text-lg font-bold tabular-nums mt-1">{stats.cantidad}</p>
+        </div>
+      </div>
+
+      {/* Sección 3: Últimas transacciones */}
+      {ultimasData && ultimasData.data.length > 0 && (
+        <div className="space-y-2">
+          <h2 className="text-sm font-medium text-muted-foreground">Últimas transacciones</h2>
+          <div className="rounded-xl border border-border divide-y divide-border">
+            {ultimasData.data.map((tx) => (
+              <div key={tx.id} className="flex items-center gap-3 px-4 py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{tx.descripcion}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {tx.categoria?.nombre ?? 'Sin categoría'} · {tx.fecha}
+                  </p>
+                </div>
+                <p
+                  className={`text-sm font-semibold tabular-nums shrink-0 ${
+                    tx.tipo === 'INGRESO'
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-red-500 dark:text-red-400'
+                  }`}
+                >
+                  {tx.tipo === 'INGRESO' ? '+' : '-'}
+                  {formatMonto(tx.monto, tx.moneda)}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Sección 4: Zona peligrosa */}
+      <div className="rounded-xl border border-dashed border-red-200 dark:border-red-900 bg-red-50/30 dark:bg-red-950/10 p-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="text-sm font-medium text-red-700 dark:text-red-400 flex items-center gap-1.5">
+              <AlertTriangle className="h-4 w-4" />
+              Eliminar cuenta
             </p>
-            <p className="text-sm text-muted-foreground mt-1">{cuenta.moneda}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Detalles</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <DetailRow label="Tipo" value={tipoInfo.label} />
-            <DetailRow label="Clasificacion" value={cuenta.clasificacion} />
-            <DetailRow label="Moneda" value={cuenta.moneda} />
-            {cuenta.institucion && <DetailRow label="Institucion" value={cuenta.institucion} />}
-            <DetailRow label="Estado" value={cuenta.estado} />
-            <DetailRow label="Creada" value={formatFecha(cuenta.creadoEl)} />
-            {cuenta.notas && (
-              <>
-                <Separator />
-                <p className="text-sm text-muted-foreground">{cuenta.notas}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Permanente. Solo funciona si no tiene transacciones.
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => setConfirmOpen(true)}
+            disabled={eliminar.isPending}
+          >
+            Eliminar
+          </Button>
+        </div>
       </div>
 
-      <div className="flex justify-end">
-        <Button variant="destructive" size="sm" onClick={() => setConfirmOpen(true)} disabled={eliminar.isPending}>
-          <Trash2 className="h-4 w-4 mr-1" />
-          Eliminar cuenta
-        </Button>
-      </div>
-
+      {/* Dialogs */}
       <CuentaForm open={formOpen} onOpenChange={setFormOpen} cuenta={cuenta} />
       <ConfirmDialog
         open={confirmOpen}
         onOpenChange={setConfirmOpen}
         onConfirm={handleEliminar}
         titulo="Eliminar cuenta"
-        descripcion={`Se eliminara la cuenta "${cuenta.nombre}" permanentemente. Esta accion no se puede deshacer.`}
+        descripcion={`Se eliminará la cuenta "${cuenta.nombre}" permanentemente. Esta acción no se puede deshacer.`}
       />
-    </div>
-  )
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex justify-between text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
     </div>
   )
 }

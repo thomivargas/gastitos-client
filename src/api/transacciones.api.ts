@@ -12,6 +12,8 @@ export interface CrearTransaccionData {
   notas?: string
   etiquetaIds?: string[]
   excluida?: boolean
+  montoOriginal?: number
+  monedaOriginal?: string
 }
 
 export interface ActualizarTransaccionData {
@@ -24,6 +26,8 @@ export interface ActualizarTransaccionData {
   notas?: string | null
   etiquetaIds?: string[]
   excluida?: boolean
+  montoOriginal?: number
+  monedaOriginal?: string
 }
 
 export interface ListaTransaccionesParams {

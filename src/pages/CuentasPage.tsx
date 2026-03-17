@@ -1,111 +1,132 @@
-import { useState } from 'react'
-import { Plus, Wallet } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ResumenCuentas } from '@/components/cuentas/ResumenCuentas'
-import { CuentaCard } from '@/components/cuentas/CuentaCard'
+import { InstitucionSection } from '@/components/cuentas/InstitucionSection'
 import { CuentaForm } from '@/components/cuentas/CuentaForm'
-import { EmptyState } from '@/components/EmptyState'
+import { InstitucionForm } from '@/components/cuentas/InstitucionForm'
 import { useCuentas } from '@/hooks/use-cuentas'
-import type { Cuenta } from '@/types'
+import type { Cuenta, Institucion } from '@/types'
 
-export default function CuentasPage() {
-  const [formOpen, setFormOpen] = useState(false)
-  const [editCuenta, setEditCuenta] = useState<Cuenta | null>(null)
-  const [tab, setTab] = useState('activas')
+// Lógica de agrupación por institución:
+function agruparPorInstitucion(cuentas: Cuenta[]) {
+  const map = new Map<string, { inst: Institucion | null; cuentas: Cuenta[] }>()
 
-  const { data: activas, isLoading: loadingActivas } = useCuentas({ estado: 'ACTIVA', limit: 50 })
-  const { data: archivadas, isLoading: loadingArchivadas } = useCuentas({ estado: 'ARCHIVADA', limit: 50 })
-
-  function handleEdit(cuenta: Cuenta) {
-    setEditCuenta(cuenta)
-    setFormOpen(true)
+  for (const c of cuentas) {
+    const key = c.institucion?.id ?? '__sin_entidad__'
+    if (!map.has(key)) {
+      map.set(key, { inst: c.institucion ?? null, cuentas: [] })
+    }
+    map.get(key)!.cuentas.push(c)
   }
 
-  function handleNew() {
-    setEditCuenta(null)
-    setFormOpen(true)
-  }
-
-  return (
-    <div className="space-y-6 page-transition">
-      <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">Cuentas</h1>
-        <Button onClick={handleNew} className="shrink-0">
-          <Plus className="h-4 w-4 sm:mr-2" />
-          <span className="hidden sm:inline">Nueva cuenta</span>
-        </Button>
-      </div>
-
-      <ResumenCuentas />
-
-      <Tabs value={tab} onValueChange={setTab}>
-        <TabsList>
-          <TabsTrigger value="activas">
-            Activas {activas?.data && `(${activas.data.length})`}
-          </TabsTrigger>
-          <TabsTrigger value="archivadas">
-            Archivadas {archivadas?.data && `(${archivadas.data.length})`}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="activas" className="mt-4">
-          {loadingActivas ? (
-            <LoadingSkeleton />
-          ) : activas?.data.length === 0 ? (
-            <EmptyState
-              icono={Wallet}
-              titulo="Sin cuentas"
-              descripcion="Agrega tu primera cuenta para empezar a registrar tus finanzas"
-              accion={{ label: 'Crear cuenta', onClick: handleNew }}
-            />
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {activas?.data.map((cuenta, i) => (
-                <div key={cuenta.id} className="stagger-item" style={{ animationDelay: `${i * 50}ms` }}>
-                  <CuentaCard cuenta={cuenta} onEdit={handleEdit} />
-                </div>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-
-        <TabsContent value="archivadas" className="mt-4">
-          {loadingArchivadas ? (
-            <LoadingSkeleton />
-          ) : archivadas?.data.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No hay cuentas archivadas</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {archivadas?.data.map((cuenta) => (
-                <CuentaCard key={cuenta.id} cuenta={cuenta} onEdit={handleEdit} />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
-
-      <CuentaForm open={formOpen} onOpenChange={setFormOpen} cuenta={editCuenta} />
-    </div>
-  )
+  return Array.from(map.entries())
+    .sort(([a], [b]) => {
+      if (a === '__sin_entidad__') return 1
+      if (b === '__sin_entidad__') return -1
+      const nombreA = map.get(a)!.inst?.nombre ?? ''
+      const nombreB = map.get(b)!.inst?.nombre ?? ''
+      return nombreA.localeCompare(nombreB)
+    })
+    .map(([, v]) => v)
 }
 
-function LoadingSkeleton() {
+export default function CuentasPage() {
+  const [cuentaFormOpen, setCuentaFormOpen] = useState(false)
+  const [editCuenta, setEditCuenta] = useState<Cuenta | null>(null)
+  const [cuentaDefaultInstitucion, setCuentaDefaultInstitucion] = useState<Institucion | null>(null)
+  const [institucionFormOpen, setInstitucionFormOpen] = useState(false)
+  const [editInstitucion, setEditInstitucion] = useState<Institucion | null>(null)
+
+  const { data: cuentasActivas } = useCuentas({ estado: 'ACTIVA', limit: 100 })
+
+  const gruposActivos = useMemo(
+    () => agruparPorInstitucion(cuentasActivas?.data ?? []),
+    [cuentasActivas]
+  )
+
+  function handleEditCuenta(cuenta: Cuenta) {
+    setEditCuenta(cuenta)
+    setCuentaFormOpen(true)
+  }
+
+  function handleNuevaCuenta(inst?: Institucion | null) {
+    setEditCuenta(null)
+    setCuentaDefaultInstitucion(inst ?? null)
+    setCuentaFormOpen(true)
+  }
+
+  function handleEditInstitucion(inst: Institucion) {
+    setEditInstitucion(inst)
+    setInstitucionFormOpen(true)
+  }
+
+  function handleNuevaInstitucion() {
+    setEditInstitucion(null)
+    setInstitucionFormOpen(true)
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Card key={i} className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg shimmer" />
-            <div className="flex-1 space-y-2">
-              <div className="h-4 w-28 rounded shimmer" />
-              <div className="h-3 w-20 rounded shimmer" />
-            </div>
-            <div className="h-6 w-24 rounded shimmer" />
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Cuentas</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Tus cuentas y activos financieros</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={handleNuevaInstitucion}>
+            <Plus className="h-4 w-4 mr-1" />
+            Nueva entidad
+          </Button>
+          <Button size="sm" onClick={() => handleNuevaCuenta()}>
+            <Plus className="h-4 w-4 mr-1" />
+            Nueva cuenta
+          </Button>
+        </div>
+      </div>
+
+      {/* Resumen */}
+      <ResumenCuentas />
+
+      {/* Cuentas */}
+      <div className="space-y-3">
+        {gruposActivos.length === 0 ? (
+          <div className="py-14 text-center">
+            <p className="text-sm text-muted-foreground">No tenés cuentas aún.</p>
+            <button
+              onClick={() => handleNuevaCuenta()}
+              className="mt-2 text-sm font-medium text-primary underline underline-offset-4 hover:opacity-80 transition-opacity"
+            >
+              Agregar la primera
+            </button>
           </div>
-        </Card>
-      ))}
+        ) : (
+          gruposActivos.map((grupo) => (
+            <InstitucionSection
+              key={grupo.inst?.id ?? '__sin_entidad__'}
+              institucion={grupo.inst}
+              cuentas={grupo.cuentas}
+              onAddCuenta={handleNuevaCuenta}
+              onEditCuenta={handleEditCuenta}
+              onEditInstitucion={grupo.inst && !grupo.inst.oficial ? () => handleEditInstitucion(grupo.inst!) : undefined}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Dialogs */}
+      <CuentaForm
+        open={cuentaFormOpen}
+        onOpenChange={(open) => { setCuentaFormOpen(open); if (!open) setCuentaDefaultInstitucion(null) }}
+        cuenta={editCuenta}
+        defaultInstitucion={cuentaDefaultInstitucion}
+      />
+      <InstitucionForm
+        open={institucionFormOpen}
+        onOpenChange={(open) => { setInstitucionFormOpen(open); if (!open) setEditInstitucion(null) }}
+        institucion={editInstitucion}
+      />
     </div>
   )
 }

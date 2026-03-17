@@ -1,12 +1,14 @@
 // ─── Enums ──────────────────────────────────────────────
 
 export type TipoCuenta =
-  | 'EFECTIVO' | 'BANCO_CORRIENTE' | 'BANCO_AHORRO'
+  | 'EFECTIVO' | 'BANCO_CORRIENTE' | 'BANCO_AHORRO' | 'BILLETERA_VIRTUAL'
   | 'TARJETA_CREDITO' | 'INVERSION' | 'PRESTAMO'
   | 'OTRO_ACTIVO' | 'OTRO_PASIVO'
 
+export type TipoInstitucion = 'BANCO' | 'BILLETERA_VIRTUAL' | 'OTRA'
+
 export type ClasificacionCuenta = 'ACTIVO' | 'PASIVO'
-export type EstadoCuenta = 'ACTIVA' | 'INACTIVA' | 'ARCHIVADA'
+export type EstadoCuenta = 'ACTIVA' | 'INACTIVA'
 export type ClasificacionCategoria = 'INGRESO' | 'GASTO'
 export type TipoTransaccion = 'INGRESO' | 'GASTO' | 'TRANSFERENCIA'
 export type Rol = 'USUARIO' | 'ADMIN'
@@ -26,6 +28,15 @@ export interface Usuario {
   creadoEl: string
 }
 
+export interface Institucion {
+  id: string
+  nombre: string
+  tipo: TipoInstitucion
+  color: string
+  icono: string
+  oficial: boolean
+}
+
 export interface Cuenta {
   id: string
   nombre: string
@@ -34,7 +45,7 @@ export interface Cuenta {
   moneda: string
   balance: number
   estado: EstadoCuenta
-  institucion: string | null
+  institucion: Institucion | null
   color: string
   icono: string
   notas: string | null
@@ -67,6 +78,8 @@ export interface Transaccion {
   descripcion: string
   notas: string | null
   excluida: boolean
+  montoOriginal: number | null
+  monedaOriginal: string | null
   creadoEl: string
   actualizadoEl: string
   cuenta: { id: string; nombre: string; tipo: TipoCuenta }

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { formResolver } from '@/lib/form'
 import { z } from 'zod'
@@ -39,6 +39,9 @@ const transaccionSchema = z.object({
   categoriaId: z.string().optional(),
   notas: z.string().max(500).optional(),
   etiquetaIds: z.array(z.string()).default([]),
+  montoOriginal: z.coerce.number().positive().optional(),
+  monedaOriginal: z.string().length(3).toUpperCase().optional(),
+  tipoCotizacion: z.enum(['blue', 'tarjeta', 'oficial']).optional(),
 })
 
 type TransaccionFormData = z.infer<typeof transaccionSchema>
@@ -51,6 +54,7 @@ interface TransaccionFormProps {
 
 export function TransaccionForm({ open, onOpenChange, transaccion }: TransaccionFormProps) {
   const isEditing = !!transaccion
+  const [showMonedaOriginal, setShowMonedaOriginal] = useState(false)
   const crear = useCrearTransaccion()
   const actualizar = useActualizarTransaccion()
   const isPending = crear.isPending || actualizar.isPending
@@ -77,6 +81,13 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
   const cuentaId = watch('cuentaId')
   const categoriaId = watch('categoriaId')
   const etiquetaIds = watch('etiquetaIds')
+  const montoOriginal = watch('montoOriginal')
+  const monedaOriginal = watch('monedaOriginal')
+  const tipoCotizacion = watch('tipoCotizacion')
+  const monto = watch('monto')
+
+  const cuentaSeleccionada = cuentas.find((c) => c.id === cuentaId)
+  const monedaCuenta = cuentaSeleccionada?.moneda ?? 'ARS'
 
   const clasificacion: ClasificacionCategoria = tipo === 'INGRESO' ? 'INGRESO' : 'GASTO'
   const { data: categorias } = useCategorias(clasificacion, open)
@@ -86,7 +97,10 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
   const isGasto = tipo === 'GASTO'
 
   useEffect(() => {
-    if (!open) return
+    if (!open) {
+      setShowMonedaOriginal(false)
+      return
+    }
     if (transaccion) {
       reset({
         tipo: transaccion.tipo as 'INGRESO' | 'GASTO',
@@ -110,6 +124,7 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
         etiquetaIds: [],
       })
     }
+    setShowMonedaOriginal(false)
   }, [transaccion, open, primerCuentaId, reset])
 
   function toggleEtiqueta(id: string) {
@@ -133,6 +148,8 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
             categoriaId: categoriaIdFinal || null,
             notas: data.notas || null,
             etiquetaIds: data.etiquetaIds,
+            montoOriginal: showMonedaOriginal ? data.montoOriginal : undefined,
+            monedaOriginal: showMonedaOriginal ? data.monedaOriginal : undefined,
           },
         },
         { onSuccess: () => onOpenChange(false) },
@@ -148,6 +165,8 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
           categoriaId: categoriaIdFinal || undefined,
           notas: data.notas || undefined,
           etiquetaIds: data.etiquetaIds.length ? data.etiquetaIds : undefined,
+          montoOriginal: showMonedaOriginal ? data.montoOriginal : undefined,
+          monedaOriginal: showMonedaOriginal ? data.monedaOriginal : undefined,
         },
         { onSuccess: () => onOpenChange(false) },
       )
@@ -225,6 +244,80 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
             </div>
             {errors.monto && <p className="text-xs text-destructive">{errors.monto.message}</p>}
           </div>
+
+          {/* Toggle doble moneda */}
+          {!showMonedaOriginal ? (
+            <button
+              type="button"
+              onClick={() => setShowMonedaOriginal(true)}
+              className="text-xs text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+            >
+              + Importe en moneda extranjera
+            </button>
+          ) : (
+            <div className="rounded-lg border border-border p-3 space-y-3 bg-muted/30">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Moneda original</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowMonedaOriginal(false)
+                    setValue('montoOriginal', undefined)
+                    setValue('monedaOriginal', undefined)
+                    setValue('tipoCotizacion', undefined)
+                  }}
+                  className="text-xs text-muted-foreground hover:text-destructive"
+                >
+                  Cancelar
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Moneda</Label>
+                  <Select
+                    value={monedaOriginal ?? 'USD'}
+                    onValueChange={(v) => setValue('monedaOriginal', v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Monto original</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...register('montoOriginal')}
+                  />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Tipo de cotizacion</Label>
+                <Select
+                  value={tipoCotizacion ?? 'blue'}
+                  onValueChange={(v) => setValue('tipoCotizacion', v as 'blue' | 'tarjeta' | 'oficial')}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="blue">Dolar blue</SelectItem>
+                    <SelectItem value="tarjeta">Dolar tarjeta</SelectItem>
+                    <SelectItem value="oficial">Dolar oficial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <p className="text-[10px] text-muted-foreground">
+                El monto principal ({monedaCuenta}) se calcula automaticamente al ingresar el importe y la cotizacion.
+              </p>
+            </div>
+          )}
 
           {/* Descripcion */}
           <div className="space-y-2">

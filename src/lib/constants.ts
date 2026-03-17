@@ -4,12 +4,19 @@ export const TIPOS_CUENTA: Record<TipoCuenta, { label: string; icono: string }> 
   EFECTIVO: { label: 'Efectivo', icono: 'banknote' },
   BANCO_CORRIENTE: { label: 'Cuenta corriente', icono: 'landmark' },
   BANCO_AHORRO: { label: 'Caja de ahorro', icono: 'piggy-bank' },
+  BILLETERA_VIRTUAL: { label: 'Billetera virtual', icono: 'smartphone' },
   TARJETA_CREDITO: { label: 'Tarjeta de crédito', icono: 'credit-card' },
   INVERSION: { label: 'Inversión', icono: 'trending-up' },
   PRESTAMO: { label: 'Préstamo', icono: 'hand-coins' },
   OTRO_ACTIVO: { label: 'Otro activo', icono: 'plus-circle' },
   OTRO_PASIVO: { label: 'Otro pasivo', icono: 'minus-circle' },
 }
+
+// Tipos visibles en el form de crear cuenta (excluye OTRO_*)
+export const TIPOS_CUENTA_FORM: TipoCuenta[] = [
+  'EFECTIVO', 'BANCO_CORRIENTE', 'BANCO_AHORRO', 'BILLETERA_VIRTUAL',
+  'TARJETA_CREDITO', 'INVERSION', 'PRESTAMO',
+]
 
 export const CLASIFICACION_LABELS: Record<ClasificacionCategoria, string> = {
   INGRESO: 'Ingreso',

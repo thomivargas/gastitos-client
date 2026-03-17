@@ -33,8 +33,8 @@ export default function ImportacionPage() {
   // Config bancaria
   const [parsers, setParsers] = useState<importApi.ParserInfo[]>([])
   const [parserId, setParserId] = useState('')
-  const [cuentaARS, setCuentaARS] = useState('')
-  const [cuentaUSD, setCuentaUSD] = useState('')
+  const [cuentaBancariaId, setCuentaBancariaId] = useState('')
+  const [tipoCambioUsd, setTipoCambioUsd] = useState<'tarjeta' | 'blue' | 'mep' | 'oficial'>('tarjeta')
   const [excluirCargos, setExcluirCargos] = useState(true)
   const [periodoResumen, setPeriodoResumen] = useState(() => {
     const now = new Date()
@@ -110,18 +110,16 @@ export default function ImportacionPage() {
 
   async function handleImportarBancario() {
     if (!archivo || !parserId) return
-    const cuentas_config: Record<string, string> = {}
-    if (cuentaARS) cuentas_config['ARS'] = cuentaARS
-    if (cuentaUSD) cuentas_config['USD'] = cuentaUSD
-    if (Object.keys(cuentas_config).length === 0) {
-      toast.error('Selecciona al menos una cuenta destino')
+    if (!cuentaBancariaId) {
+      toast.error('Seleccioná una cuenta destino')
       return
     }
     setLoading(true)
     try {
       const res = await importApi.ejecutarBancario(archivo, {
         parserId,
-        cuentas: cuentas_config,
+        cuentaId: cuentaBancariaId,
+        tipoCambioUsd,
         excluirCargosBancarios: excluirCargos,
         fechaResumen: `${periodoResumen}-01`,
       })
@@ -141,8 +139,8 @@ export default function ImportacionPage() {
     setPreviewBancario(null)
     setResultado(null)
     setCuentaId('')
-    setCuentaARS('')
-    setCuentaUSD('')
+    setCuentaBancariaId('')
+    setTipoCambioUsd('tarjeta')
     const now = new Date()
     setPeriodoResumen(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
     if (fileRef.current) fileRef.current.value = ''
@@ -187,10 +185,10 @@ export default function ImportacionPage() {
             onParserIdChange={setParserId}
             parserActual={parserActual}
             cuentas={cuentas}
-            cuentaARS={cuentaARS}
-            onCuentaARSChange={setCuentaARS}
-            cuentaUSD={cuentaUSD}
-            onCuentaUSDChange={setCuentaUSD}
+            cuentaId={cuentaBancariaId}
+            onCuentaIdChange={setCuentaBancariaId}
+            tipoCambioUsd={tipoCambioUsd}
+            onTipoCambioUsdChange={setTipoCambioUsd}
             periodoResumen={periodoResumen}
             onPeriodoResumenChange={setPeriodoResumen}
             excluirCargos={excluirCargos}

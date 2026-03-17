@@ -6,7 +6,7 @@ export interface CrearCuentaData {
   tipo: string
   moneda?: string
   balanceInicial?: number
-  institucion?: string
+  institucionId?: string
   color?: string
   icono?: string
   notas?: string
@@ -15,7 +15,7 @@ export interface CrearCuentaData {
 export interface ActualizarCuentaData {
   nombre?: string
   moneda?: string
-  institucion?: string | null
+  institucionId?: string | null
   color?: string
   icono?: string
   notas?: string | null
@@ -63,15 +63,6 @@ export async function actualizar(id: string, data: ActualizarCuentaData) {
   return res.data.data
 }
 
-export async function archivar(id: string) {
-  const res = await apiClient.patch<ApiResponse<Cuenta>>(`/cuentas/${id}/archivar`)
-  return res.data.data
-}
-
-export async function reactivar(id: string) {
-  const res = await apiClient.patch<ApiResponse<Cuenta>>(`/cuentas/${id}/reactivar`)
-  return res.data.data
-}
 
 export async function eliminar(id: string) {
   await apiClient.delete(`/cuentas/${id}`)

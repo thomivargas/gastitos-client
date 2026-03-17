@@ -11,6 +11,8 @@ import {
 import type { Cuenta } from '@/types'
 import type * as importApi from '@/api/importacion.api'
 
+type TipoCambioUsd = 'tarjeta' | 'blue' | 'mep' | 'oficial'
+
 interface Props {
   open: boolean
   onClose: () => void
@@ -20,10 +22,10 @@ interface Props {
   onParserIdChange: (id: string) => void
   parserActual: importApi.ParserInfo | undefined
   cuentas: Cuenta[]
-  cuentaARS: string
-  onCuentaARSChange: (id: string) => void
-  cuentaUSD: string
-  onCuentaUSDChange: (id: string) => void
+  cuentaId: string
+  onCuentaIdChange: (id: string) => void
+  tipoCambioUsd: TipoCambioUsd
+  onTipoCambioUsdChange: (v: TipoCambioUsd) => void
   periodoResumen: string
   onPeriodoResumenChange: (p: string) => void
   excluirCargos: boolean
@@ -33,11 +35,12 @@ interface Props {
 export function ConfigBancarioModal({
   open, onClose, onConfirm,
   parsers, parserId, onParserIdChange, parserActual,
-  cuentas, cuentaARS, onCuentaARSChange, cuentaUSD, onCuentaUSDChange,
+  cuentas, cuentaId, onCuentaIdChange,
+  tipoCambioUsd, onTipoCambioUsdChange,
   periodoResumen, onPeriodoResumenChange,
   excluirCargos, onExcluirCargosChange,
 }: Props) {
-  const canConfirm = !!parserId && (!!cuentaARS || !!cuentaUSD)
+  const canConfirm = !!parserId && !!cuentaId
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -56,7 +59,7 @@ export function ConfigBancarioModal({
                 Configurar resumen bancario
               </DialogTitle>
               <p className="text-xs text-[#888] mt-1 leading-relaxed">
-                Elegí el banco, las cuentas destino y el período del extracto.
+                Elegí el banco, la cuenta destino y el período del extracto.
               </p>
             </div>
           </div>
@@ -99,54 +102,52 @@ export function ConfigBancarioModal({
             )}
           </div>
 
-          {/* Cuentas */}
+          {/* Cuenta destino */}
           <div className="space-y-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Cuentas destino</p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-[#444] flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-green-100 text-green-700 text-[9px] font-bold">$</span>
-                  Pesos (ARS)
-                </Label>
-                <Select
-                  value={cuentaARS || null}
-                  onValueChange={(v) => onCuentaARSChange(v === '_none' || !v ? '' : v)}
-                  itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}
-                >
-                  <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
-                    <SelectValue placeholder="Sin cuenta" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">Sin cuenta ARS</SelectItem>
-                    {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-[#444] flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-blue-100 text-blue-700 text-[9px] font-bold">$</span>
-                  Dólares (USD)
-                </Label>
-                <Select
-                  value={cuentaUSD || null}
-                  onValueChange={(v) => onCuentaUSDChange(v === '_none' || !v ? '' : v)}
-                  itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}
-                >
-                  <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
-                    <SelectValue placeholder="Sin cuenta" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="_none">Sin cuenta USD</SelectItem>
-                    {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Cuenta destino</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-[#444]">
+                Todas las transacciones se importarán aquí
+              </Label>
+              <Select
+                value={cuentaId || undefined}
+                onValueChange={(v) => onCuentaIdChange(v)}
+                itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}
+              >
+                <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
+                  <SelectValue placeholder="Seleccionar cuenta" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
-            {!cuentaARS && !cuentaUSD && (
+            {!cuentaId && (
               <p className="text-[11px] text-amber-700 rounded-lg px-3">
-                Seleccioná al menos una cuenta destino para continuar.
+                Seleccioná una cuenta destino para continuar.
               </p>
             )}
+          </div>
+
+          {/* Cotización USD */}
+          <div className="space-y-2.5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Cotización USD</p>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium text-[#444]">
+                Tasa usada para convertir gastos en dólares a pesos
+              </Label>
+              <Select value={tipoCambioUsd} onValueChange={(v) => onTipoCambioUsdChange(v as TipoCambioUsd)}>
+                <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="tarjeta">Tarjeta</SelectItem>
+                  <SelectItem value="blue">Blue</SelectItem>
+                  <SelectItem value="mep">MEP</SelectItem>
+                  <SelectItem value="oficial">Oficial</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Período */}

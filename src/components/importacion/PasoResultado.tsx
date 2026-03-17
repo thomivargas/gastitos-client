@@ -46,23 +46,12 @@ export function PasoResultado({ resultadoBancario, onReset }: Props) {
         </div>
       )}
 
-      {/* Breakdown por moneda */}
-      {resultadoBancario && Object.keys(resultadoBancario.porCuenta).length > 0 && (
+      {/* Conversiones USD */}
+      {resultadoBancario && resultadoBancario.convertidas > 0 && (
         <div className="flex gap-2 flex-wrap">
-          {Object.entries(resultadoBancario.porCuenta).map(([moneda, count]) => (
-            <span
-              key={moneda}
-              className={`
-                text-xs px-3 py-1.5 rounded-full font-medium
-                ${moneda === 'USD'
-                  ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400'
-                  : 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400'
-                }
-              `}
-            >
-              {count} transacciones en {moneda}
-            </span>
-          ))}
+          <span className="text-xs px-3 py-1.5 rounded-full font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-400">
+            {resultadoBancario.convertidas} convertidas de USD a ARS
+          </span>
         </div>
       )}
 
