@@ -43,7 +43,6 @@ export async function ejecutar(archivo: File, config: ConfigImport) {
   return res.data
 }
 
-/** Descarga el archivo de exportación con autenticación */
 // ── Bancario ──────────────────────────────────────────────────────────────
 
 export interface ParserInfo {
@@ -115,37 +114,3 @@ export async function ejecutarBancario(archivo: File, config: ConfigImportBancar
   return res.data
 }
 
-// ── Exportar / Plantilla ────────────────────────────────────────────────────
-
-export async function exportar(params?: { cuentaId?: string; fechaDesde?: string; fechaHasta?: string }) {
-  const query = new URLSearchParams()
-  if (params?.cuentaId) query.set('cuentaId', params.cuentaId)
-  if (params?.fechaDesde) query.set('fechaDesde', params.fechaDesde)
-  if (params?.fechaHasta) query.set('fechaHasta', params.fechaHasta)
-
-  const res = await apiClient.get(`/importacion/exportar?${query.toString()}`, {
-    responseType: 'blob',
-  })
-
-  descargarBlob(res.data, 'gastitos-export.csv')
-}
-
-/** Descarga la plantilla con autenticación */
-export async function descargarPlantilla() {
-  const res = await apiClient.get('/importacion/plantilla', {
-    responseType: 'blob',
-  })
-
-  descargarBlob(res.data, 'gastitos-plantilla.csv')
-}
-
-function descargarBlob(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  document.body.removeChild(a)
-  URL.revokeObjectURL(url)
-}

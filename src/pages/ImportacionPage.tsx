@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import {
-  Upload, Download, FileSpreadsheet, Building2, Table2,
-  CheckCircle2, ArrowRight, X, FileText, Ban, HelpCircle
+  Upload, Building2, Table2,
+  CheckCircle2, ArrowRight, Ban, HelpCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
 import {
   Accordion,
   AccordionContent,
@@ -230,41 +229,20 @@ export default function ImportacionPage() {
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div className="space-y-3">
-          <h1 className="text-2xl font-bold tracking-tight">Importar / Exportar</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Importar</h1>
           {showRail && <StepRail paso={paso} modo={modo} />}
         </div>
         <div className="flex gap-2 shrink-0 pt-0.5">
-          <button
-            onClick={() => importApi.descargarPlantilla()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
-              border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
-              transition-colors duration-150"
-          >
-            <FileSpreadsheet className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Plantilla</span>
-          </button>
-          <button
-            onClick={() => importApi.exportar()}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
-              border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
-              transition-colors duration-150"
-          >
-            <Download className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Exportar</span>
-          </button>
-
           {/* Ayuda */}
           <Dialog>
-            <DialogTrigger asChild>
-              <button
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
-                  border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
-                  transition-colors duration-150"
-                aria-label="Ayuda"
-              >
-                <HelpCircle className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Ayuda</span>
-              </button>
+            <DialogTrigger
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
+                border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
+                transition-colors duration-150"
+              aria-label="Ayuda"
+            >
+              <HelpCircle className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Ayuda</span>
             </DialogTrigger>
             <DialogContent
               className="
@@ -278,10 +256,10 @@ export default function ImportacionPage() {
                 <DialogHeader>
                   <DialogTitle className="text-base font-semibold text-[#0a0a0a] flex items-center gap-2">
                     <HelpCircle className="h-4 w-4 text-[#737373]" />
-                    ¿Cómo funciona Importar / Exportar?
+                    ¿Cómo funciona Importar?
                   </DialogTitle>
                   <p className="text-xs text-[#737373] mt-0.5">
-                    Todo lo que necesitás saber para mover tus transacciones.
+                    Todo lo que necesitás saber para importar transacciones.
                   </p>
                 </DialogHeader>
               </div>
@@ -291,7 +269,7 @@ export default function ImportacionPage() {
                 className="px-2 pb-4"
                 style={{ '--muted-foreground': '#525252', '--foreground': '#0a0a0a', '--border': '#e5e5e5', '--muted': '#f5f5f5' } as React.CSSProperties}
               >
-                <Accordion type="multiple" defaultValue={['importar-csv']} className="divide-y divide-[#e5e5e5]">
+                <Accordion openMultiple defaultValue={['importar-csv']} className="divide-y divide-[#e5e5e5]">
 
                   <AccordionItem value="importar-csv" className="border-0 px-4">
                     <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
@@ -357,41 +335,6 @@ export default function ImportacionPage() {
                         <p className="text-xs text-[#737373] bg-[#f5f5f5] rounded-lg px-3 py-2">
                           Las cuotas ("2/3") se guardan en el campo de notas de cada transacción.
                         </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="exportar" className="border-0 px-4">
-                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
-                          <Download className="h-3.5 w-3.5 text-[#525252]" />
-                        </div>
-                        Exportar transacciones
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-4 px-0">
-                      <div className="ml-8 space-y-2 text-[#525252] text-sm">
-                        <p>El botón <strong className="text-[#0a0a0a] font-medium">Exportar</strong> (arriba a la derecha) descarga todas tus transacciones en formato CSV.</p>
-                        <p className="text-xs text-[#737373] bg-[#f5f5f5] rounded-lg px-3 py-2">
-                          Incluye: fecha, tipo, monto, moneda, descripción, categoría, cuenta y notas. Abrilo en Excel o Google Sheets.
-                        </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-
-                  <AccordionItem value="plantilla" className="border-0 px-4">
-                    <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-md bg-[#f5f5f5] flex items-center justify-center shrink-0">
-                          <FileSpreadsheet className="h-3.5 w-3.5 text-[#525252]" />
-                        </div>
-                        ¿Para qué sirve la Plantilla?
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="pb-4 px-0">
-                      <div className="ml-8 text-[#525252] text-sm">
-                        <p>Descarga un CSV de ejemplo con el formato que espera el importador genérico. Útil si querés cargar transacciones manualmente o adaptar datos de otro sistema al formato de Gastitos.</p>
                       </div>
                     </AccordionContent>
                   </AccordionItem>
@@ -513,7 +456,7 @@ export default function ImportacionPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta ARS</Label>
-                  <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' ? '' : v)}>
+                  <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' || !v ? '' : v)}>
                     <SelectTrigger className="bg-muted/40 border-0 h-10">
                       <SelectValue placeholder="Pesos argentinos" />
                     </SelectTrigger>
@@ -525,7 +468,7 @@ export default function ImportacionPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta USD</Label>
-                  <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' ? '' : v)}>
+                  <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' || !v ? '' : v)}>
                     <SelectTrigger className="bg-muted/40 border-0 h-10">
                       <SelectValue placeholder="Dólares" />
                     </SelectTrigger>
@@ -787,7 +730,6 @@ export default function ImportacionPage() {
             {(() => {
               const total = previewBancario.transacciones
               const ars = total.filter(t => t.moneda === 'ARS' && !t.excluida).length
-              const usd = total.filter(t => t.moneda === 'USD' && !t.excluida).length
               return (
                 <>
                   {ars > 0 && (

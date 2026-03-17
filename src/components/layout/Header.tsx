@@ -25,7 +25,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/reportes': 'Reportes',
   '/recurrentes': 'Recurrentes',
   '/moneda': 'Moneda',
-  '/importar': 'Importar / Exportar',
+  '/importar': 'Importar',
   '/reglas': 'Reglas',
   '/configuracion': 'Configuracion',
 }

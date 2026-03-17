@@ -94,21 +94,23 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
                 <li key={to}>
                   {collapsed ? (
                     <Tooltip>
-                      <TooltipTrigger asChild>
-                        <NavLink
-                          to={to}
-                          end={to === '/'}
-                          className={({ isActive }) =>
-                            cn(
-                              'flex items-center justify-center rounded-md p-2 transition-all duration-150',
-                              isActive
-                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-                            )
-                          }
-                        >
-                          <Icon className="h-4 w-4 shrink-0" />
-                        </NavLink>
+                      <TooltipTrigger
+                        render={
+                          <NavLink
+                            to={to}
+                            end={to === '/'}
+                            className={({ isActive }) =>
+                              cn(
+                                'flex items-center justify-center rounded-md p-2 transition-all duration-150',
+                                isActive
+                                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+                              )
+                            }
+                          />
+                        }
+                      >
+                        <Icon className="h-4 w-4 shrink-0" />
                       </TooltipTrigger>
                       <TooltipContent side="right" className="text-xs">
                         {label}
@@ -142,13 +144,11 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
       <div className="px-2 pb-3 border-t border-sidebar-border pt-2">
         {collapsed ? (
           <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                onClick={() => { setConfiguracionOpen(true); setSidebarOpen(false) }}
-                className="flex w-full items-center justify-center rounded-md p-2 transition-all duration-150 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-              >
-                <settingsItem.icon className="h-4 w-4 shrink-0" />
-              </button>
+            <TooltipTrigger
+              onClick={() => { setConfiguracionOpen(true); setSidebarOpen(false) }}
+              className="flex w-full items-center justify-center rounded-md p-2 transition-all duration-150 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+            >
+              <settingsItem.icon className="h-4 w-4 shrink-0" />
             </TooltipTrigger>
             <TooltipContent side="right" className="text-xs">
               {settingsItem.label}

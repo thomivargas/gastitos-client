@@ -16,6 +16,13 @@ export function useGastosPorCategoria(desde?: string, hasta?: string) {
   })
 }
 
+export function useIngresosPorCategoria(desde?: string, hasta?: string) {
+  return useQuery({
+    queryKey: ['reportes', 'ingresos-por-categoria', desde, hasta],
+    queryFn: () => api.ingresosPorCategoria(desde, hasta),
+  })
+}
+
 export function useTendenciaMensual(meses: number = 12) {
   return useQuery({
     queryKey: ['reportes', 'tendencia-mensual', meses],

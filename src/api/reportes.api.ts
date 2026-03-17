@@ -98,3 +98,35 @@ export async function topGastos(desde?: string, hasta?: string, limit: number = 
   })
   return res.data.data
 }
+
+function descargarBlob(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
+}
+
+export async function exportar(params?: { cuentaId?: string; fechaDesde?: string; fechaHasta?: string }) {
+  const query = new URLSearchParams()
+  if (params?.cuentaId) query.set('cuentaId', params.cuentaId)
+  if (params?.fechaDesde) query.set('fechaDesde', params.fechaDesde)
+  if (params?.fechaHasta) query.set('fechaHasta', params.fechaHasta)
+
+  const res = await apiClient.get(`/reportes/exportar?${query.toString()}`, {
+    responseType: 'blob',
+  })
+
+  descargarBlob(res.data, 'gastitos-export.csv')
+}
+
+export async function descargarPlantilla() {
+  const res = await apiClient.get('/reportes/plantilla', {
+    responseType: 'blob',
+  })
+
+  descargarBlob(res.data, 'gastitos-plantilla.csv')
+}
