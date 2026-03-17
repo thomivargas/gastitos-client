@@ -4,6 +4,7 @@ import { formResolver } from '@/lib/form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { MoneyInput } from '@/components/ui/money-input'
 import { Label } from '@/components/ui/label'
 import {
   Dialog,
@@ -203,12 +204,11 @@ export function TransferenciaForm({ open, onOpenChange }: TransferenciaFormProps
               <Label htmlFor="tf-monto">
                 Monto {origen ? `(${origen.moneda})` : ''}
               </Label>
-              <Input
+              <MoneyInput
                 id="tf-monto"
-                type="number"
-                step="0.01"
-                min="0.01"
-                {...register('monto', { onChange: () => recalcular('monto') })}
+                value={watch('monto')}
+                onChange={(v) => { setValue('monto', v); recalcular('monto') }}
+                moneda={origen?.moneda}
               />
               {errors.monto && <p className="text-xs text-destructive">{errors.monto.message}</p>}
             </div>
@@ -230,12 +230,11 @@ export function TransferenciaForm({ open, onOpenChange }: TransferenciaFormProps
                   <Label htmlFor="tf-monto-dest">
                     Monto destino ({destino?.moneda})
                   </Label>
-                  <Input
+                  <MoneyInput
                     id="tf-monto-dest"
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    {...register('montoDestino', { onChange: () => recalcular('montoDestino') })}
+                    value={watch('montoDestino') ?? 0}
+                    onChange={(v) => { setValue('montoDestino', v || undefined); recalcular('montoDestino') }}
+                    moneda={destino?.moneda}
                   />
                 </div>
               </>

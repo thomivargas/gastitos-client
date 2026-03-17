@@ -7,7 +7,7 @@ import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { useCuenta, useEliminarCuenta } from '@/hooks/use-cuentas'
 import { useTransacciones } from '@/hooks/use-transacciones'
 import { TIPOS_CUENTA } from '@/lib/constants'
-import { formatMonto } from '@/lib/formatters'
+import { formatMonto, formatFecha } from '@/lib/formatters'
 
 export default function CuentaDetallePage() {
   const { id } = useParams<{ id: string }>()
@@ -63,11 +63,9 @@ export default function CuentaDetallePage() {
   if (!cuenta) return null
 
   const balance = Number(cuenta.balance)
-  const isPasivo = cuenta.clasificacion === 'PASIVO'
-  const balanceColor =
-    (!isPasivo && balance >= 0) || (isPasivo && balance < 0)
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-red-500 dark:text-red-400'
+  const balanceColor = balance >= 0
+    ? 'text-green-600 dark:text-green-400'
+    : 'text-red-500 dark:text-red-400'
   const tipoCuentaInfo = TIPOS_CUENTA[cuenta.tipo]
   function handleEliminar() {
     eliminar.mutate(cuenta!.id, {
@@ -148,7 +146,7 @@ export default function CuentaDetallePage() {
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{tx.descripcion}</p>
                   <p className="text-xs text-muted-foreground">
-                    {tx.categoria?.nombre ?? 'Sin categoría'} · {tx.fecha}
+                    {tx.categoria?.nombre ?? 'Sin categoría'} · {formatFecha(tx.fecha)}
                   </p>
                 </div>
                 <p

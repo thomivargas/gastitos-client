@@ -18,12 +18,6 @@ const ICONOS_INSTITUCION: Record<TipoInstitucion, React.ComponentType<{ classNam
   OTRA: Building2,
 }
 
-const TIPO_LABELS: Record<TipoInstitucion, string> = {
-  BANCO: 'Banco',
-  BILLETERA_VIRTUAL: 'Billetera virtual',
-  OTRA: 'Otra',
-}
-
 interface InstitucionSectionProps {
   institucion: Institucion | null
   cuentas: Cuenta[]
@@ -47,7 +41,7 @@ export function InstitucionSection({
 
   const monedaRep = cuentas[0]?.moneda ?? 'ARS'
   const mixedCurrencies = cuentas.length > 1 && cuentas.some((c) => c.moneda !== monedaRep)
-  const totalBalance = cuentas.reduce((sum, c) => sum + c.balance, 0)
+  const totalBalance = cuentas.reduce((sum, c) => sum + Number(c.balance), 0)
 
   return (
     <div>
@@ -79,11 +73,6 @@ export function InstitucionSection({
         {/* Name + type badge + count */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
           <span className="font-semibold text-sm truncate">{nombre}</span>
-          {institucion && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground uppercase tracking-wide shrink-0">
-              {TIPO_LABELS[institucion.tipo]}
-            </span>
-          )}
           <span className="text-xs text-muted-foreground shrink-0">
             ({cuentas.length} {cuentas.length === 1 ? 'cuenta' : 'cuentas'})
           </span>

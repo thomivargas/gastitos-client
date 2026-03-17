@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { MoneyInput } from '@/components/ui/money-input'
 import { Label } from '@/components/ui/label'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import {
@@ -260,7 +261,10 @@ function RecurrenteFormDialog({ open, onOpenChange }: { open: boolean; onOpenCha
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Monto</Label>
-              <Input type="number" step="0.01" min="0.01" {...register('monto')} />
+              <MoneyInput
+                value={watch('monto')}
+                onChange={(v) => setValue('monto', v)}
+              />
               {errors.monto && <p className="text-xs text-destructive">{errors.monto.message}</p>}
             </div>
             <div className="space-y-2">

@@ -1,4 +1,4 @@
-import { User, Palette, Shield, Monitor } from 'lucide-react'
+import { User, Shield, Monitor } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -8,13 +8,11 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { useUIStore } from '@/stores/ui.store'
 import { PerfilSection } from './PerfilSection'
-import { AparienciaSection } from './AparienciaSection'
 import { SeguridadSection } from './SeguridadSection'
 import { SesionesSection } from './SesionesSection'
 
 const tabs = [
   { value: 'perfil', label: 'Perfil', icon: User },
-  { value: 'apariencia', label: 'Apariencia', icon: Palette },
   { value: 'seguridad', label: 'Seguridad', icon: Shield },
   { value: 'sesiones', label: 'Sesiones', icon: Monitor },
 ] as const
@@ -39,12 +37,9 @@ export function ConfiguracionDialog() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <Separator />
+          <Separator/>
           <TabsContent value="perfil" className="overflow-y-auto p-4 flex-1">
             <PerfilSection />
-          </TabsContent>
-          <TabsContent value="apariencia" className="overflow-y-auto p-4 flex-1">
-            <AparienciaSection />
           </TabsContent>
           <TabsContent value="seguridad" className="overflow-y-auto p-4 flex-1">
             <SeguridadSection />
@@ -55,7 +50,7 @@ export function ConfiguracionDialog() {
         </Tabs>
 
         {/* Desktop: tabs verticales lateral */}
-        <Tabs defaultValue="perfil" orientation="vertical" className="hidden sm:flex h-[520px]">
+        <Tabs defaultValue="perfil" orientation="vertical" className="hidden sm:flex h-130">
           <div className="flex flex-col w-48 shrink-0 bg-muted/30 p-4 gap-4">
             <DialogTitle className="text-base font-semibold">Configuracion</DialogTitle>
             <TabsList variant="line" className="flex flex-col gap-1">
@@ -72,9 +67,6 @@ export function ConfiguracionDialog() {
 
           <TabsContent value="perfil" className="overflow-y-auto p-6">
             <PerfilSection />
-          </TabsContent>
-          <TabsContent value="apariencia" className="overflow-y-auto p-6">
-            <AparienciaSection />
           </TabsContent>
           <TabsContent value="seguridad" className="overflow-y-auto p-6">
             <SeguridadSection />

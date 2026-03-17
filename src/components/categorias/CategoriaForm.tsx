@@ -178,7 +178,7 @@ export function CategoriaForm({
                     key={c}
                     type="button"
                     onClick={() => setValue('color', c)}
-                    className="h-8 w-8 rounded-full border-2 transition-transform"
+                    className="h-8 w-8 rounded-full border-2 transition-transform cursor-pointer"
                     style={{
                       backgroundColor: c,
                       borderColor: color === c ? 'var(--foreground)' : 'transparent',
@@ -191,8 +191,8 @@ export function CategoriaForm({
           </div>
 
           <DialogFooter>
-            <DialogClose>Cancelar</DialogClose>
-            <Button type="submit" disabled={isPending}>
+            <DialogClose className={'cursor-pointer'}>Cancelar</DialogClose>
+            <Button type="submit" disabled={isPending} className={'cursor-pointer'}>
               {isPending ? 'Guardando...' : isEditing ? 'Guardar' : 'Crear'}
             </Button>
           </DialogFooter>

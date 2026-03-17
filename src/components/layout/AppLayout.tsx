@@ -2,6 +2,7 @@ import { Outlet, useLocation } from 'react-router'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
+import { GlobalFetchingIndicator } from './GlobalFetchingIndicator'
 import { ConfiguracionDialog } from '@/components/configuracion/ConfiguracionDialog'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useUIStore } from '@/stores/ui.store'
@@ -14,6 +15,7 @@ export function AppLayout() {
 
   return (
     <TooltipProvider>
+      <GlobalFetchingIndicator />
       <div className="min-h-screen flex">
         {/* Desktop sidebar */}
         <div className={`hidden lg:block ${sidebarW} border-r border-sidebar-border shrink-0 transition-[width] duration-200`}>

@@ -42,8 +42,7 @@ export function CuentaRow({ cuenta, onEdit }: CuentaRowProps) {
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const Icon = ICONOS[cuenta.tipo] || Banknote
-  const isPasivo = cuenta.clasificacion === 'PASIVO'
-  const isPositive = (!isPasivo && cuenta.balance >= 0) || (isPasivo && cuenta.balance <= 0)
+  const isPositive = Number(cuenta.balance) >= 0
   const accentColor = cuenta.color || '#6172F3'
 
   return (
@@ -54,7 +53,7 @@ export function CuentaRow({ cuenta, onEdit }: CuentaRowProps) {
       >
         {/* Left color accent strip */}
         <div
-          className="absolute left-0 top-2.5 bottom-2.5 w-[3px] rounded-r-full opacity-50 group-hover:opacity-90 transition-opacity"
+          className="absolute left-0 top-2.5 bottom-2.5 w-0.75 rounded-r-full opacity-50 group-hover:opacity-90 transition-opacity"
           style={{ backgroundColor: accentColor }}
         />
 
@@ -83,7 +82,7 @@ export function CuentaRow({ cuenta, onEdit }: CuentaRowProps) {
             'text-sm font-semibold tabular-nums',
             isPositive ? 'text-foreground' : 'text-red-500 dark:text-red-400',
           )}>
-            {formatMonto(cuenta.balance, cuenta.moneda)}
+            {formatMonto(Number(cuenta.balance), cuenta.moneda)}
           </p>
           {cuenta.moneda !== 'ARS' && (
             <span className="text-[10px] text-muted-foreground">{cuenta.moneda}</span>

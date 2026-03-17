@@ -36,23 +36,28 @@ export function ResumenCuentas() {
   const isPosNeto = data.patrimonioNeto >= 0
 
   return (
-    <div className="relative rounded-2xl border border-border bg-card overflow-hidden">
+    <div className="relative rounded-2xl border border-border bg-card overflow-hidden lg:min-w-4xl lg:w-4xl">
       <BorderBeam size={280} duration={14} colorFrom="#6172F3" colorTo="#36BFFA" borderWidth={1.5} />
 
       <div className="p-5">
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-4">
-          {/* Patrimonio neto — hero stat */}
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
-              Patrimonio neto
-            </p>
-            <p className={cn(
-              'text-2xl font-bold tabular-nums tracking-tight',
-              isPosNeto ? 'text-foreground' : 'text-red-500 dark:text-red-400',
+        <div className="flex flex-wrap gap-x-8 gap-y-4 flex-col lg:flex-row lg:items-center">
+          <div className="flex items-center gap-8 flex-1 min-w-0">
+            {/* Patrimonio neto — hero stat */}
+            <div>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
+                Patrimonio neto
+              </p>
+              <p className={cn(
+                'text-2xl font-bold tabular-nums tracking-tight',
+                isPosNeto ? 'text-foreground' : 'text-red-500 dark:text-red-400',
+              )}>
+                {formatMonto(data.patrimonioNeto, data.moneda)}
+              </p>
+            </div>
+            <div className={cn(
+              "flex items-center gap-1 mt-1.5 py-1 px-2 rounded-md",
+              isPosNeto ? "bg-emerald-500/10" : "bg-red-500/10",
             )}>
-              {formatMonto(data.patrimonioNeto, data.moneda)}
-            </p>
-            <div className="flex items-center gap-1 mt-1.5">
               {isPosNeto
                 ? <TrendingUp className="h-3 w-3 text-emerald-500 shrink-0" />
                 : <TrendingDown className="h-3 w-3 text-red-400 shrink-0" />
@@ -64,41 +69,41 @@ export function ResumenCuentas() {
                 {isPosNeto ? 'Activo neto positivo' : 'Pasivos superan activos'}
               </span>
             </div>
-          </div>
-
+          </div>  
           <div className="h-12 w-px bg-border hidden sm:block shrink-0" />
+          <div className='flex justify-between lg:gap-16'>
+            {/* Activos */}
+            <div className="shrink-0">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
+                Activos
+              </p>
+              <p className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
+                {formatMonto(data.totalActivos, data.moneda)}
+              </p>
+            </div>
 
-          {/* Activos */}
-          <div className="shrink-0">
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
-              Activos
-            </p>
-            <p className="text-sm font-semibold tabular-nums text-emerald-600 dark:text-emerald-400">
-              {formatMonto(data.totalActivos, data.moneda)}
-            </p>
-          </div>
+            {/* Pasivos */}
+            <div className="shrink-0">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
+                Pasivos
+              </p>
+              <p className="text-sm font-semibold tabular-nums text-red-500 dark:text-red-400">
+                {formatMonto(Math.abs(data.totalPasivos), data.moneda)}
+              </p>
+            </div>
 
-          {/* Pasivos */}
-          <div className="shrink-0">
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1">
-              Pasivos
-            </p>
-            <p className="text-sm font-semibold tabular-nums text-red-500 dark:text-red-400">
-              {formatMonto(Math.abs(data.totalPasivos), data.moneda)}
-            </p>
-          </div>
+            <div className="h-12 w-px bg-border hidden sm:block shrink-0" />
 
-          <div className="h-12 w-px bg-border hidden sm:block shrink-0" />
-
-          {/* Cuentas activas */}
-          <div className="shrink-0">
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1 flex items-center gap-1">
-              <LayoutGrid className="h-3 w-3" />
-              Cuentas
-            </p>
-            <p className="text-xl font-bold tabular-nums">
-              <NumberTicker value={data.cantidadCuentas} className="text-foreground" />
-            </p>
+            {/* Cuentas activas */}
+            <div className="shrink-0">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground mb-1 flex items-center gap-1">
+                <LayoutGrid className="h-3 w-3" />
+                Cuentas
+              </p>
+              <p className="text-xl font-bold tabular-nums">
+                <NumberTicker value={data.cantidadCuentas} className="text-foreground" />
+              </p>
+            </div>
           </div>
         </div>
 
@@ -117,12 +122,12 @@ export function ResumenCuentas() {
             </div>
             <div className="h-1.5 rounded-full bg-muted overflow-hidden flex">
               <div
-                className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-1000 ease-out"
+                className="h-full bg-linear-to-r from-emerald-500 to-emerald-400 transition-all duration-1000 ease-out"
                 style={{ width: `${activosRatio}%` }}
               />
-              {data.totalPasivos > 0 && (
+              {data.totalPasivos !== 0 && (
                 <div
-                  className="h-full bg-gradient-to-r from-red-400 to-red-500 transition-all duration-1000 ease-out"
+                  className="h-full bg-linear-to-r from-red-400 to-red-500 transition-all duration-1000 ease-out"
                   style={{ width: `${100 - activosRatio}%` }}
                 />
               )}

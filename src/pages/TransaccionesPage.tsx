@@ -52,7 +52,7 @@ export default function TransaccionesPage() {
             </p>
           )}
         </div>
-        <Button onClick={handleNew} className="shrink-0">
+        <Button onClick={handleNew} className="shrink-0 cursor-pointer">
           <Plus className="h-4 w-4 sm:mr-2" />
           <span className="hidden sm:inline">Nueva transaccion</span>
         </Button>

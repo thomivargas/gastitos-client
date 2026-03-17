@@ -4,6 +4,7 @@ import { formResolver } from '@/lib/form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { MoneyInput } from '@/components/ui/money-input'
 import { Label } from '@/components/ui/label'
 import {
   Dialog,
@@ -279,11 +280,11 @@ export function CuentaForm({ open, onOpenChange, cuenta, defaultInstitucion }: C
             {!isEditing && (
               <div className="space-y-2">
                 <Label htmlFor="balance">Balance inicial</Label>
-                <Input
+                <MoneyInput
                   id="balance"
-                  type="number"
-                  step="0.01"
-                  {...register('balanceInicial')}
+                  value={watch('balanceInicial')}
+                  onChange={(v) => setValue('balanceInicial', v)}
+                  moneda={moneda}
                 />
               </div>
             )}
@@ -300,7 +301,12 @@ export function CuentaForm({ open, onOpenChange, cuenta, defaultInstitucion }: C
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Sin entidad" />
+                  <SelectValue placeholder="Sin entidad">
+                    {(value: string) => value
+                      ? (instituciones.find(i => i.id === value)?.nombre ?? value)
+                      : 'Sin entidad'
+                    }
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">Sin entidad</SelectItem>

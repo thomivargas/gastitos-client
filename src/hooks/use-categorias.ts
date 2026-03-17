@@ -7,9 +7,10 @@ import { extractApiError } from '@/lib/utils'
 // ─── Cache helpers (lista simple) ────────────────────────
 
 function agregarEnCacheLista(qc: QueryClient, item: Categoria) {
-  qc.setQueriesData<Categoria[]>(
-    { queryKey: ['categorias'], exact: false },
-    (old) => Array.isArray(old) ? [item, ...old] : old,
+  // Solo agregar al cache de la clasificacion correcta
+  qc.setQueryData<Categoria[]>(
+    ['categorias', item.clasificacion],
+    (old) => Array.isArray(old) ? [item, ...old] : [item],
   )
 }
 

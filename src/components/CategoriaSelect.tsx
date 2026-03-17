@@ -108,7 +108,7 @@ export function CategoriaSelect({
           <Popover.Popup
             className="w-(--anchor-width) min-w-50 rounded-lg bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 origin-(--transform-origin) data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95"
           >
-            {/* Busqueda */}
+            {/* Busqueda */}  
             <div className="flex items-center gap-2 border-b px-3 py-2">
               <Search className="h-4 w-4 text-muted-foreground shrink-0" />
               <input
@@ -127,7 +127,7 @@ export function CategoriaSelect({
                 <button
                   type="button"
                   className={cn(
-                    'relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1.5 pr-8 pl-2 text-sm outline-hidden select-none',
+                    'relative flex w-full cursor-pointer items-center gap-1.5 rounded-md py-1.5 pr-8 pl-2 text-sm outline-hidden select-none',
                     'hover:bg-accent hover:text-accent-foreground',
                     (!value || value === '_none' || value === '') && 'bg-accent/50',
                   )}
@@ -154,7 +154,7 @@ export function CategoriaSelect({
                     key={cat.id}
                     type="button"
                     className={cn(
-                      'relative flex w-full cursor-default items-center gap-1.5 rounded-md py-1.5 pr-8 text-sm outline-hidden select-none',
+                      'relative flex w-full cursor-pointer items-center gap-1.5 rounded-md py-1.5 pr-8 text-sm outline-hidden select-none',
                       'hover:bg-accent hover:text-accent-foreground',
                       cat.esSub ? 'pl-6' : 'pl-2',
                       isSelected && 'bg-accent/50',

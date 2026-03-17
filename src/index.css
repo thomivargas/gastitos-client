@@ -126,6 +126,7 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
     }
 
   /* Calendar icon color for date inputs */
@@ -149,6 +150,14 @@
     filter: invert(1);
     cursor: pointer;
   }
+}
+
+/* Loading bar global */
+@keyframes loading-bar {
+  0% { transform: translateX(-100%) scaleX(0.3); }
+  40% { transform: translateX(10%) scaleX(0.6); }
+  70% { transform: translateX(60%) scaleX(0.3); }
+  100% { transform: translateX(100%) scaleX(0.1); }
 }
 
 /* Animaciones globales */

@@ -4,6 +4,7 @@ import { formResolver } from '@/lib/form'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { MoneyInput } from '@/components/ui/money-input'
 import { Label } from '@/components/ui/label'
 import {
   Dialog,
@@ -23,7 +24,7 @@ import {
 } from '@/components/ui/select'
 import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { Badge } from '@/components/ui/badge'
-import { X, ArrowDownCircle, ArrowUpCircle, DollarSign } from 'lucide-react'
+import { X, ArrowDownCircle, ArrowUpCircle } from 'lucide-react'
 import { useCuentas } from '@/hooks/use-cuentas'
 import { useCategorias } from '@/hooks/use-categorias'
 import { useEtiquetas } from '@/hooks/use-etiquetas'
@@ -226,20 +227,13 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
           {/* Monto - prominente */}
           <div className="space-y-2">
             <Label htmlFor="t-monto">Monto</Label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
-                <DollarSign className="h-4 w-4" />
-              </span>
-              <Input
-                id="t-monto"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                className="pl-9 text-lg font-semibold tabular-nums h-10"
-                {...register('monto')}
-              />
-            </div>
+            <MoneyInput
+              id="t-monto"
+              value={watch('monto')}
+              onChange={(v) => setValue('monto', v)}
+              moneda={monedaCuenta}
+              className="text-lg font-semibold h-10"
+            />
             {errors.monto && <p className="text-xs text-destructive">{errors.monto.message}</p>}
           </div>
 
@@ -287,11 +281,10 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs">Monto original</Label>
-                  <Input
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    {...register('montoOriginal')}
+                  <MoneyInput
+                    value={watch('montoOriginal') ?? 0}
+                    onChange={(v) => setValue('montoOriginal', v || undefined)}
+                    moneda={monedaOriginal ?? 'USD'}
                   />
                 </div>
               </div>
