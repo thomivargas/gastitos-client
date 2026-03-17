@@ -162,7 +162,7 @@ export function InstitucionForm({ open, onOpenChange, institucion, onSuccess }: 
           </div>
 
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose>
               <Button type="button" variant="outline">Cancelar</Button>
             </DialogClose>
             <Button type="submit" disabled={isPending}>

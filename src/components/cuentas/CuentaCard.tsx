@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router'
 import {
   Banknote, Landmark, PiggyBank, CreditCard,
   TrendingUp, HandCoins, PlusCircle, MinusCircle,
-  MoreVertical, Archive, RotateCcw, Trash2,
+  MoreVertical, Trash2,
+  Smartphone,
 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,14 +16,14 @@ import {
 } from '@/components/ui/dropdown-menu'
 import type { Cuenta, TipoCuenta } from '@/types'
 import { formatMonto } from '@/lib/formatters'
-import { TIPOS_CUENTA } from '@/lib/constants'
-import { useArchivarCuenta, useReactivarCuenta, useEliminarCuenta } from '@/hooks/use-cuentas'
+import { useEliminarCuenta } from '@/hooks/use-cuentas'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 
 const ICONOS: Record<TipoCuenta, React.ComponentType<{ className?: string; style?: React.CSSProperties }>> = {
   EFECTIVO: Banknote,
   BANCO_CORRIENTE: Landmark,
   BANCO_AHORRO: PiggyBank,
+  BILLETERA_VIRTUAL: Smartphone,
   TARJETA_CREDITO: CreditCard,
   INVERSION: TrendingUp,
   PRESTAMO: HandCoins,
@@ -38,13 +38,10 @@ interface CuentaCardProps {
 
 export function CuentaCard({ cuenta, onEdit }: CuentaCardProps) {
   const navigate = useNavigate()
-  const archivar = useArchivarCuenta()
-  const reactivar = useReactivarCuenta()
   const eliminar = useEliminarCuenta()
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const Icon = ICONOS[cuenta.tipo] || Banknote
-  const isArchivada = cuenta.estado === 'ARCHIVADA'
   const balanceColor = cuenta.balance >= 0 ? 'text-green-600' : 'text-red-500'
 
   return (
@@ -63,18 +60,6 @@ export function CuentaCard({ cuenta, onEdit }: CuentaCardProps) {
                 className="h-5 w-5"
                 style={{ color: cuenta.color || undefined }}
               />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-medium">{cuenta.nombre}</h3>
-                {isArchivada && (
-                  <Badge variant="secondary" className="text-xs">Archivada</Badge>
-                )}
-              </div>
-              <p className="text-sm text-muted-foreground">{TIPOS_CUENTA[cuenta.tipo].label}</p>
-              {cuenta.institucion && (
-                <p className="text-xs text-muted-foreground">{cuenta.institucion}</p>
-              )}
             </div>
           </div>
 
@@ -98,17 +83,6 @@ export function CuentaCard({ cuenta, onEdit }: CuentaCardProps) {
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEdit(cuenta) }}>
                   Editar
                 </DropdownMenuItem>
-                {isArchivada ? (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); reactivar.mutate(cuenta.id) }}>
-                    <RotateCcw className="h-4 w-4 mr-2" />
-                    Reactivar
-                  </DropdownMenuItem>
-                ) : (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); archivar.mutate(cuenta.id) }}>
-                    <Archive className="h-4 w-4 mr-2" />
-                    Archivar
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"

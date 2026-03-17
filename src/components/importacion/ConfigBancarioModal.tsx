@@ -111,7 +111,7 @@ export function ConfigBancarioModal({
               </Label>
               <Select
                 value={cuentaId || undefined}
-                onValueChange={(v) => onCuentaIdChange(v)}
+                onValueChange={(v) => onCuentaIdChange(v!)}
                 itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}
               >
                 <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">

@@ -113,7 +113,7 @@ export function InstitucionSection({
 
           {esEditable && onEditInstitucion && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger>
                 <Button
                   variant="ghost"
                   size="icon"

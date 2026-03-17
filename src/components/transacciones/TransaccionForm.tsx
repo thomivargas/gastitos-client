@@ -81,10 +81,8 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
   const cuentaId = watch('cuentaId')
   const categoriaId = watch('categoriaId')
   const etiquetaIds = watch('etiquetaIds')
-  const montoOriginal = watch('montoOriginal')
   const monedaOriginal = watch('monedaOriginal')
   const tipoCotizacion = watch('tipoCotizacion')
-  const monto = watch('monto')
 
   const cuentaSeleccionada = cuentas.find((c) => c.id === cuentaId)
   const monedaCuenta = cuentaSeleccionada?.moneda ?? 'ARS'
@@ -276,7 +274,7 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
                   <Label className="text-xs">Moneda</Label>
                   <Select
                     value={monedaOriginal ?? 'USD'}
-                    onValueChange={(v) => setValue('monedaOriginal', v)}
+                    onValueChange={(v) => setValue('monedaOriginal', v!)}
                   >
                     <SelectTrigger>
                       <SelectValue />
