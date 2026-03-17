@@ -147,7 +147,7 @@ export default function ReportesPage() {
         {cuentas.length > 1 && (
           <div className="space-y-1 col-span-2 sm:col-span-1">
             <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Cuenta</Label>
-            <Select value={cuentaId} onValueChange={(v) => setCuentaId(v === '_todas' ? '' : v)}>
+            <Select value={cuentaId} onValueChange={(v) => setCuentaId(v === '_todas' || !v ? '' : v)}>
               <SelectTrigger className="sm:w-[160px] bg-muted/40 border-0 h-9">
                 <SelectValue placeholder="Todas las cuentas" />
               </SelectTrigger>

@@ -269,7 +269,7 @@ export default function ImportacionPage() {
                 className="px-2 pb-4"
                 style={{ '--muted-foreground': '#525252', '--foreground': '#0a0a0a', '--border': '#e5e5e5', '--muted': '#f5f5f5' } as React.CSSProperties}
               >
-                <Accordion openMultiple defaultValue={['importar-csv']} className="divide-y divide-[#e5e5e5]">
+                <Accordion multiple defaultValue={['importar-csv']} className="divide-y divide-[#e5e5e5]">
 
                   <AccordionItem value="importar-csv" className="border-0 px-4">
                     <AccordionTrigger className="text-sm py-4 hover:no-underline font-semibold text-[#0a0a0a] [&>svg]:text-[#737373]">
