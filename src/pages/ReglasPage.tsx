@@ -79,7 +79,7 @@ export default function ReglasPage() {
                     className="h-2.5 w-2.5 rounded-full shrink-0"
                     style={{ backgroundColor: r.categoria.color }}
                   />
-                  <span className="text-sm text-muted-foreground truncate max-w-[100px]">{r.categoria.nombre}</span>
+                  <span className="text-sm text-muted-foreground truncate max-w-25">{r.categoria.nombre}</span>
                 </div>
 
                 <span className="text-xs text-muted-foreground shrink-0 hidden sm:block">P:{r.prioridad}</span>

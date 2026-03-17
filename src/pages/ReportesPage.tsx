@@ -134,7 +134,7 @@ export default function ReportesPage() {
         <div className="space-y-1 col-span-2 sm:col-span-1">
           <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Agrupacion</Label>
           <Select value={agrupacion} onValueChange={(v) => v && setAgrupacion(v)}>
-            <SelectTrigger className="sm:w-[130px] bg-muted/40 border-0 h-9">
+            <SelectTrigger className="sm:w-32.5 bg-muted/40 border-0 h-9">
               <SelectValue placeholder="Agrupacion" />
             </SelectTrigger>
             <SelectContent>
@@ -147,8 +147,8 @@ export default function ReportesPage() {
         {cuentas.length > 1 && (
           <div className="space-y-1 col-span-2 sm:col-span-1">
             <Label className="text-[10px] uppercase tracking-wide text-muted-foreground">Cuenta</Label>
-            <Select value={cuentaId} onValueChange={(v) => setCuentaId(v === '_todas' || !v ? '' : v)}>
-              <SelectTrigger className="sm:w-[160px] bg-muted/40 border-0 h-9">
+            <Select value={cuentaId} onValueChange={(v) => setCuentaId(v === '_todas' || !v ? '' : v)} itemToStringLabel={(v) => cuentas.find(c => c.id === v)?.nombre ?? v}>
+              <SelectTrigger className="sm:w-40 bg-muted/40 border-0 h-9">
                 <SelectValue placeholder="Todas las cuentas" />
               </SelectTrigger>
               <SelectContent>

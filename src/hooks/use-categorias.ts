@@ -9,21 +9,21 @@ import { extractApiError } from '@/lib/utils'
 function agregarEnCacheLista(qc: QueryClient, item: Categoria) {
   qc.setQueriesData<Categoria[]>(
     { queryKey: ['categorias'], exact: false },
-    (old) => old ? [item, ...old] : [item],
+    (old) => Array.isArray(old) ? [item, ...old] : old,
   )
 }
 
 function actualizarEnCacheLista(qc: QueryClient, item: Categoria) {
   qc.setQueriesData<Categoria[]>(
     { queryKey: ['categorias'], exact: false },
-    (old) => old ? old.map((i) => (i.id === item.id ? item : i)) : old,
+    (old) => Array.isArray(old) ? old.map((i) => (i.id === item.id ? item : i)) : old,
   )
 }
 
 function removerDeCacheLista(qc: QueryClient, id: string) {
   qc.setQueriesData<Categoria[]>(
     { queryKey: ['categorias'], exact: false },
-    (old) => old ? old.filter((i) => i.id !== id) : old,
+    (old) => Array.isArray(old) ? old.filter((i) => i.id !== id) : old,
   )
 }
 

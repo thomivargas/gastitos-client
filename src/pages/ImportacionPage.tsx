@@ -115,6 +115,11 @@ export default function ImportacionPage() {
   const [cuentaARS, setCuentaARS] = useState('')
   const [cuentaUSD, setCuentaUSD] = useState('')
   const [excluirCargos, setExcluirCargos] = useState(true)
+  const [periodoResumen, setPeriodoResumen] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+  })
+  const [configBancarioOpen, setConfigBancarioOpen] = useState(false)
   const [previewBancario, setPreviewBancario] = useState<importApi.PreviewBancarioData | null>(null)
 
   const [resultado, setResultado] = useState<{ status: string; data?: unknown } | null>(null)
@@ -197,6 +202,7 @@ export default function ImportacionPage() {
         parserId,
         cuentas: cuentas_config,
         excluirCargosBancarios: excluirCargos,
+        fechaResumen: `${periodoResumen}-01`,
       })
       setResultado(res)
       setPaso('resultado')
@@ -216,6 +222,8 @@ export default function ImportacionPage() {
     setCuentaId('')
     setCuentaARS('')
     setCuentaUSD('')
+    const now = new Date()
+    setPeriodoResumen(`${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`)
     if (fileRef.current) fileRef.current.value = ''
   }
 
@@ -247,7 +255,7 @@ export default function ImportacionPage() {
             <DialogContent
               className="
                 sm:max-w-lg w-full max-h-[90vh] overflow-y-auto
-                !bg-white !text-[#0a0a0a] !ring-black/10
+                bg-white! text-[#0a0a0a]! ring-black/10!
                 p-0
               "
             >
@@ -349,7 +357,7 @@ export default function ImportacionPage() {
       {/* ── Paso 0: Selector de modo ───────────────────────── */}
       {paso === 'modo' && (
         <div className="space-y-5 animate-slide-up-fade">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-card-foreground">
             ¿Qué tipo de archivo vas a importar?
           </p>
 
@@ -429,84 +437,176 @@ export default function ImportacionPage() {
             </button>
           </div>
 
-          {/* Config bancaria */}
-          {modo === 'bancario' && (
-            <div className="rounded-2xl border border-border p-5 space-y-5 animate-slide-up-fade bg-card">
-              <div className="text-sm font-semibold">Configuración del banco</div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Banco / Tipo de resumen</Label>
-                <Select value={parserId} onValueChange={(v) => v && setParserId(v)}>
-                  <SelectTrigger className="bg-muted/40 border-0 h-10">
-                    <SelectValue placeholder="Seleccionar banco" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {parsers.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {parserActual && (
-                  <p className="text-xs text-muted-foreground">
-                    Formatos soportados: {parserActual.tipoArchivo.join(', ')}
-                  </p>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta ARS</Label>
-                  <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' || !v ? '' : v)}>
-                    <SelectTrigger className="bg-muted/40 border-0 h-10">
-                      <SelectValue placeholder="Pesos argentinos" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_none">Sin cuenta ARS</SelectItem>
-                      {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta USD</Label>
-                  <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' || !v ? '' : v)}>
-                    <SelectTrigger className="bg-muted/40 border-0 h-10">
-                      <SelectValue placeholder="Dólares" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="_none">Sin cuenta USD</SelectItem>
-                      {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <label className="flex items-center gap-2.5 cursor-pointer group">
-                <input
-                  id="excluir-cargos"
-                  type="checkbox"
-                  checked={excluirCargos}
-                  onChange={(e) => setExcluirCargos(e.target.checked)}
-                  className="h-4 w-4 rounded border-border accent-amber-500"
-                />
-                <div>
-                  <div className="text-sm font-medium group-hover:text-foreground transition-colors">
-                    Excluir cargos bancarios
-                  </div>
-                  <div className="text-xs text-muted-foreground">IVA, percepciones, intereses financieros</div>
-                </div>
-              </label>
-            </div>
-          )}
-
           <div className="flex justify-end pt-1">
             <Button
-              onClick={() => setPaso('upload')}
-              disabled={modo === 'bancario' && (!parserId || (!cuentaARS && !cuentaUSD))}
+              onClick={() => modo === 'bancario' ? setConfigBancarioOpen(true) : setPaso('upload')}
               className="gap-2 bg-foreground text-background hover:bg-foreground/85 px-6"
             >
               Continuar <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
+
+          {/* Modal config bancaria */}
+          <Dialog open={configBancarioOpen} onOpenChange={setConfigBancarioOpen}>
+            <DialogContent className="sm:max-w-md w-full p-0 overflow-hidden gap-0">
+              {/* Franja amber top */}
+              <div className="h-0.5 bg-linear-to-r from-amber-400 via-amber-500 to-amber-400" />
+
+              {/* Header */}
+              <div className="px-6 pt-5 pb-4 border-b border-card">
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Building2 className="h-5 w-5 text-amber-600" />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-[15px] font-semibold leading-tight">
+                      Configurar resumen bancario
+                    </DialogTitle>
+                    <p className="text-xs text-[#888] mt-1 leading-relaxed">
+                      Elegí el banco, las cuentas destino y el período del extracto.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Cuerpo scrollable */}
+              <div className="px-6 py-2 space-y-6 max-h-[60vh] overflow-y-auto">
+
+                {/* Sección: Banco */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] pb-2">Banco</p>
+                  {parsers.length <= 1 ? (
+                    <div className="flex items-center gap-3 px-3.5 py-2.5 rounded-xl border border-card">
+                      <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                        <Building2 className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {parserActual?.nombre ?? 'BBVA Tarjeta de Crédito'}
+                        </p>
+                        {parserActual && (
+                          <p className="text-[11px] text-[#888] mt-0.5">
+                            {parserActual.tipoArchivo.join(', ')}
+                          </p>
+                        )}
+                      </div>
+                      <CheckCircle2 className="h-4 w-4 text-amber-500 shrink-0" />
+                    </div>
+                  ) : (
+                    <Select value={parserId} onValueChange={(v) => v && setParserId(v)}>
+                      <SelectTrigger className="h-10 border border-card focus-visible:border-amber-400">
+                        <SelectValue placeholder="Seleccionar banco" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {parsers.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>{p.nombre}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
+
+                {/* Sección: Cuentas */}
+                <div className="space-y-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Cuentas destino</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-[#444] flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-green-100 text-green-700 text-[9px] font-bold">$</span>
+                        Pesos (ARS)
+                      </Label>
+                      <Select value={cuentaARS || null} onValueChange={(v) => setCuentaARS(v === '_none' || !v ? '' : v)} itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}>
+                        <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
+                          <SelectValue placeholder="Sin cuenta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_none">Sin cuenta ARS</SelectItem>
+                          {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-medium text-[#444] flex items-center gap-1.5">
+                        <span className="inline-flex items-center justify-center w-4 h-4 rounded bg-blue-100 text-blue-700 text-[9px] font-bold">$</span>
+                        Dólares (USD)
+                      </Label>
+                      <Select value={cuentaUSD || null} onValueChange={(v) => setCuentaUSD(v === '_none' || !v ? '' : v)} itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}>
+                        <SelectTrigger className="h-9 border border-card text-sm cursor-pointer">
+                          <SelectValue placeholder="Sin cuenta" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="_none">Sin cuenta USD</SelectItem>
+                          {cuentas.map((c) => <SelectItem key={c.id} value={c.id}>{c.nombre}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {!cuentaARS && !cuentaUSD && (
+                    <p className="text-[11px] text-amber-700 rounded-lg px-3">
+                      Seleccioná al menos una cuenta destino para continuar.
+                    </p>
+                  )}
+                </div>
+
+                {/* Sección: Período */}
+                <div className="space-y-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Período del resumen</p>
+                  <input
+                    type="month"
+                    value={periodoResumen}
+                    onChange={(e) => e.target.value && setPeriodoResumen(e.target.value)}
+                    className="flex h-10 rounded-xl border border-card px-3 py-2 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 transition-colors"
+                  />
+                  <p className="text-[10px] text-[#888] leading-relaxed">
+                    Las cuotas se registran con el mes del resumen en lugar de la fecha de compra original.
+                  </p>
+                </div>
+
+                {/* Sección: Opciones */}
+                <div className="space-y-2.5">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#b0b0b0]">Opciones</p>
+                  <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-xl border border-card hover:bg-card/30 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={excluirCargos}
+                      onChange={(e) => setExcluirCargos(e.target.checked)}
+                      className="h-4 w-4 mt-0.5 shrink-0 rounded accent-amber-500"
+                    />
+                    <div>
+                      <p className="text-sm font-medium transition-colors">
+                        Excluir cargos bancarios
+                      </p>
+                      <p className="text-[10px] text-[#888] mt-0.5 leading-relaxed">
+                        Omite IVA, percepciones, intereses financieros y comisiones del banco.
+                      </p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-card flex items-center justify-between gap-3">
+                <button
+                  onClick={() => setConfigBancarioOpen(false)}
+                  className="text-sm text-[#888] hover:text-white transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={() => {
+                    if (!parserId || (!cuentaARS && !cuentaUSD)) return
+                    setConfigBancarioOpen(false)
+                    setPaso('upload')
+                  }}
+                  disabled={!parserId || (!cuentaARS && !cuentaUSD)}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-lg bg-white text-black text-sm font-medium
+                    hover:bg-white/90 active:scale-[0.98] transition-all disabled:opacity-35 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  Continuar <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       )}
 
@@ -590,7 +690,7 @@ export default function ImportacionPage() {
           {/* Cuenta destino */}
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Cuenta destino</Label>
-            <Select value={cuentaId || null} onValueChange={(v) => v && setCuentaId(v)}>
+            <Select value={cuentaId || null} onValueChange={(v) => v && setCuentaId(v)} itemToStringLabel={(v) => v ? cuentas.find(c => c.id === v)?.nombre ?? v : ''}>
               <SelectTrigger className="h-10 bg-muted/40 border-0">
                 <SelectValue placeholder="Seleccionar cuenta" />
               </SelectTrigger>
@@ -678,7 +778,7 @@ export default function ImportacionPage() {
                   {preview.filas.slice(0, 5).map((fila, i) => (
                     <tr key={i} className={`border-b border-border/50 last:border-0 ${i % 2 === 0 ? '' : 'bg-muted/20'}`}>
                       {preview.columnas.map((col) => (
-                        <td key={col} className="px-4 py-2.5 truncate max-w-[180px] text-foreground/80">
+                        <td key={col} className="px-4 py-2.5 truncate max-w-45 text-foreground/80">
                           {fila[col]}
                         </td>
                       ))}
@@ -793,7 +893,7 @@ export default function ImportacionPage() {
                       <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground tabular-nums">
                         {new Date(t.fecha).toLocaleDateString('es-AR')}
                       </td>
-                      <td className="px-4 py-2.5 max-w-[200px] truncate">
+                      <td className="px-4 py-2.5 max-w-50 truncate">
                         {t.excluida && <Ban className="inline h-3 w-3 mr-1 text-muted-foreground" />}
                         {t.descripcion}
                       </td>

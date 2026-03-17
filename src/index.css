@@ -138,6 +138,17 @@
     filter: invert(1);
     cursor: pointer;
   }
+
+    /* Calendar icon color for date inputs */
+  input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+    cursor: pointer;
+  }
+
+  .dark input[type="month"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
 }
 
 /* Animaciones globales */

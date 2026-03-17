@@ -36,7 +36,9 @@ export const TransaccionRow = memo(function TransaccionRow({ transaccion: t, onE
           <ArrowDownCircle className="h-4 w-4" />
         )}
       </div>
+      <div>
 
+      </div>
       {/* Descripcion + categoria + etiquetas */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
@@ -68,20 +70,26 @@ export const TransaccionRow = memo(function TransaccionRow({ transaccion: t, onE
               +{t.etiquetas.length - 2}
             </span>
           )}
+          {t.notas && (
+            <span className="text-[10px] text-amber-500 hidden sm:inline">
+              {t.notas}
+            </span>
+          )}  
         </div>
       </div>
+      <div className='flex max-w-56 w-full justify-between gap-4'>
+        {/* Cuenta */}
+        <span className="text-xs text-muted-foreground hidden md:block shrink-0 truncate max-w-25 bg-muted/50 px-2 py-0.5 rounded">
+          {t.cuenta.nombre}
+        </span>
 
-      {/* Cuenta */}
-      <span className="text-xs text-muted-foreground hidden md:block shrink-0 truncate max-w-25 bg-muted/50 px-2 py-0.5 rounded">
-        {t.cuenta.nombre}
-      </span>
-
-      {/* Monto */}
-      <span className={`text-sm font-semibold tabular-nums shrink-0 ${
-        isIngreso ? 'text-emerald-600 dark:text-emerald-400' : 'text-foreground'
-      }`}>
-        {isIngreso ? '+' : '-'}{formatMonto(t.monto, t.moneda)}
-      </span>
+        {/* Monto */}
+        <span className={`text-sm font-semibold tabular-nums shrink-0 ${
+          isIngreso ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'
+        }`}>
+          {isIngreso ? '+' : '-'}{formatMonto(t.monto, t.moneda)}
+        </span>
+      </div>
 
       {/* Acciones */}
       <div className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity shrink-0">

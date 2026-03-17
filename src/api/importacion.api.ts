@@ -78,6 +78,7 @@ export interface ConfigImportBancario {
   cuentas: Record<string, string> // { ARS: uuid, USD: uuid }
   aplicarReglas?: boolean
   excluirCargosBancarios?: boolean
+  fechaResumen?: string // YYYY-MM-DD, primer día del período del resumen
 }
 
 export interface ResultadoBancario {
