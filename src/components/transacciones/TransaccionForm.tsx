@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { formResolver } from '@/lib/form'
 import { z } from 'zod'
@@ -25,6 +26,7 @@ import {
 import { CategoriaSelect } from '@/components/CategoriaSelect'
 import { Badge } from '@/components/ui/badge'
 import { X, ArrowDownCircle, ArrowUpCircle } from 'lucide-react'
+import { obtenerTasas } from '@/api/monedas.api'
 import { useCuentas } from '@/hooks/use-cuentas'
 import { useCategorias } from '@/hooks/use-categorias'
 import { useEtiquetas } from '@/hooks/use-etiquetas'
@@ -84,6 +86,14 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
   const etiquetaIds = watch('etiquetaIds')
   const monedaOriginal = watch('monedaOriginal')
   const tipoCotizacion = watch('tipoCotizacion')
+  const montoOriginal = watch('montoOriginal')
+
+  const { data: tasas } = useQuery({
+    queryKey: ['tasas'],
+    queryFn: obtenerTasas,
+    enabled: open && showMonedaOriginal,
+    staleTime: 5 * 60 * 1000,
+  })
 
   const cuentaSeleccionada = cuentas.find((c) => c.id === cuentaId)
   const monedaCuenta = cuentaSeleccionada?.moneda ?? 'ARS'
@@ -94,6 +104,30 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
 
   const categoriasLista = categorias || []
   const isGasto = tipo === 'GASTO'
+
+  // Tasa encontrada para mostrar info al usuario
+  const tasaEncontrada = showMonedaOriginal && tasas
+    ? tasas.find(
+        (t) =>
+          t.monedaOrigen === (monedaOriginal ?? 'USD') &&
+          t.monedaDestino === monedaCuenta &&
+          t.tipo === (tipoCotizacion ?? 'blue'),
+      )
+    : null
+
+  // Calculo automatico del monto en la moneda de la cuenta
+  useEffect(() => {
+    if (!showMonedaOriginal || !montoOriginal || !tasas) return
+    const tasa = tasas.find(
+      (t) =>
+        t.monedaOrigen === (monedaOriginal ?? 'USD') &&
+        t.monedaDestino === monedaCuenta &&
+        t.tipo === (tipoCotizacion ?? 'blue'),
+    )
+    if (tasa) {
+      setValue('monto', Math.round(montoOriginal * tasa.tasa * 100) / 100)
+    }
+  }, [montoOriginal, tipoCotizacion, monedaOriginal, tasas, showMonedaOriginal, monedaCuenta, setValue])
 
   useEffect(() => {
     if (!open) {
@@ -304,9 +338,15 @@ export function TransaccionForm({ open, onOpenChange, transaccion }: Transaccion
                   </SelectContent>
                 </Select>
               </div>
-              <p className="text-[10px] text-muted-foreground">
-                El monto principal ({monedaCuenta}) se calcula automaticamente al ingresar el importe y la cotizacion.
-              </p>
+              {tasaEncontrada ? (
+                <p className="text-[10px] text-muted-foreground">
+                  Tasa {tasaEncontrada.tipo}: 1 {tasaEncontrada.monedaOrigen} = {tasaEncontrada.tasa.toLocaleString('es-AR')} {tasaEncontrada.monedaDestino}. El monto en {monedaCuenta} se actualiza automaticamente (podes editarlo).
+                </p>
+              ) : (
+                <p className="text-[10px] text-muted-foreground">
+                  El monto en {monedaCuenta} se calcula automaticamente al ingresar el importe y la cotizacion.
+                </p>
+              )}
             </div>
           )}
 
