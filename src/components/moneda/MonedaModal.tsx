@@ -100,9 +100,9 @@ export function MonedaModal() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-1.5 text-xs font-medium text-muted-foreground font-normal">Tipo</th>
-                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground font-normal">Tasa</th>
-                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground font-normal">Fecha</th>
+                  <th className="text-left py-1.5 text-xs font-medium text-muted-foreground">Tipo</th>
+                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground">Tasa</th>
+                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground">Fecha</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -162,9 +162,9 @@ export function MonedaModal() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  <th className="text-left py-1.5 text-xs font-medium text-muted-foreground font-normal">Tipo</th>
-                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground font-normal">Tasa</th>
-                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground font-normal">Total ARS</th>
+                  <th className="text-left py-1.5 text-xs font-medium text-muted-foreground">Tipo</th>
+                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground">Tasa</th>
+                  <th className="text-right py-1.5 text-xs font-medium text-muted-foreground">Total ARS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

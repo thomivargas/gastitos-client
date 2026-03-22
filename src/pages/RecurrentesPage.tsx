@@ -4,7 +4,7 @@ import { formResolver } from '@/lib/form'
 import { z } from 'zod'
 import {
   Plus, Play, Pause, Trash2, Repeat, Pencil,
-  CalendarClock, Wallet, Tag, TrendingDown, TrendingUp, Activity,
+  CalendarClock, Wallet, TrendingDown, TrendingUp, Activity,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
