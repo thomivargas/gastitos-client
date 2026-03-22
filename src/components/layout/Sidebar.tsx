@@ -74,14 +74,26 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
   return (
     <aside className={cn('flex flex-col h-full bg-sidebar text-sidebar-foreground overflow-hidden', className)}>
       {/* Logo */}
-      <div className={cn(
-        'flex items-center h-14 border-b border-sidebar-border shrink-0',
-        collapsed && 'justify-center px-0'
-      )}>
-        {collapsed
-          ? <img src={logo} alt="Gastitos" className="h-7 w-7 object-contain" />
-          : <img src={logoConTexto} width={100} alt="Gastitos" className="pl-3 object-contain" />
-        }
+      <div className="relative h-14 border-b border-sidebar-border shrink-0 flex items-center justify-center">
+        {/* Icono (collapsed) */}
+        <img
+          src={logo}
+          alt="Gastitos"
+          className={cn(
+            'h-7 w-7 object-contain transition-all',
+            collapsed ? 'opacity-100 scale-100' : 'opacity-0 scale-75 pointer-events-none',
+          )}
+        />
+        {/* Logo con texto (expanded) */}
+        <img
+          src={logoConTexto}
+          alt="Gastitos"
+          style={{ width: 100 }}
+          className={cn(
+            'absolute left-3 object-contain transition-all',
+            collapsed ? 'opacity-0 -translate-x-1 pointer-events-none' : 'opacity-100 translate-x-0',
+          )}
+        />
       </div>
 
       {/* Nav */}

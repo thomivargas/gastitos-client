@@ -1,10 +1,63 @@
+import { VitePWA } from 'vite-plugin-pwa'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'logo.png'],
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /\/api\//,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              networkTimeoutSeconds: 10,
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+      manifest: {
+        name: 'Gastitos',
+        short_name: 'Gastitos',
+        description: 'Finanzas personales',
+        display: 'standalone',
+        orientation: 'portrait',
+        theme_color: '#d4721a',
+        background_color: '#ffffff',
+        start_url: '/',
+        scope: '/',
+        icons: [
+          {
+            src: 'pwa-192x192.png',
+            sizes: '192x192',
+            type: 'image/png',
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+          },
+          {
+            src: 'maskable-icon-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -28,10 +81,7 @@ export default defineConfig({
     target: 'es2022',
     cssMinify: 'lightningcss',
     modulePreload: {
-      // No precargar chunks pesados que no se usan en la primera pagina
       resolveDependencies: (url, deps) => {
-        // Solo precargar lo esencial para el primer render
-        // Los chunks lazy se cargan bajo demanda cuando se necesitan
         const isEntry = url.includes('index-')
         if (!isEntry) return []
         return deps.filter((dep) =>
@@ -45,7 +95,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            // Orden importa: checks mas especificos primero
             if (id.includes('recharts') || id.includes('d3-'))
               return 'vendor-recharts'
             if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('/zod/'))
