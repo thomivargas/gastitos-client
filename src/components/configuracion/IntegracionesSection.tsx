@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Unplug, ExternalLink } from 'lucide-react'
+import { Unplug, ExternalLink, RefreshCw } from 'lucide-react'
 import { useMercadoPago } from '@/hooks/useMercadoPago'
 import { useCuentas } from '@/hooks/use-cuentas'
 import { Button } from '@/components/ui/button'
@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/alert-dialog'
 
 export function IntegracionesSection() {
-  const { conectado, cuentaId, isLoading, conectar, desconectar, isDesconectando } = useMercadoPago()
+  const { conectado, cuentaId, isLoading, conectar, desconectar, isDesconectando, sincronizar, isSincronizando } = useMercadoPago()
   const { data: cuentasData } = useCuentas({ estado: 'ACTIVA', limit: 100 })
   const cuentas = cuentasData?.data ?? []
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState<string>('')
@@ -75,6 +75,18 @@ export function IntegracionesSection() {
               </p>
             )}
 
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={isSincronizando}
+                onClick={() => sincronizar()}
+              >
+                <RefreshCw className={`h-3.5 w-3.5 ${isSincronizando ? 'animate-spin' : ''}`} />
+                {isSincronizando ? 'Sincronizando...' : 'Sincronizar'}
+              </Button>
+
             <AlertDialog>
               <AlertDialogTrigger
                 render={
@@ -108,6 +120,7 @@ export function IntegracionesSection() {
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
+            </div>
           </div>
         ) : (
           <div className="space-y-3">

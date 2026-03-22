@@ -18,6 +18,13 @@ async function desconectarMP(): Promise<void> {
   await apiClient.delete('/mercadopago/desconectar')
 }
 
+async function sincronizarMP(): Promise<number> {
+  const { data } = await apiClient.post<{ status: string; data: { importados: number } }>(
+    '/mercadopago/sincronizar',
+  )
+  return data.data.importados
+}
+
 export function useMercadoPago() {
   const queryClient = useQueryClient()
 
@@ -34,6 +41,22 @@ export function useMercadoPago() {
     },
     onError: () => {
       toast.error('Error al desconectar Mercado Pago')
+    },
+  })
+
+  const sincronizarMutation = useMutation({
+    mutationFn: sincronizarMP,
+    onSuccess: (importados) => {
+      queryClient.invalidateQueries({ queryKey: ['transacciones'] })
+      queryClient.invalidateQueries({ queryKey: ['cuentas'] })
+      if (importados > 0) {
+        toast.success(`${importados} transacción${importados !== 1 ? 'es' : ''} importada${importados !== 1 ? 's' : ''}`)
+      } else {
+        toast.info('Sin transacciones nuevas')
+      }
+    },
+    onError: () => {
+      toast.error('Error al sincronizar Mercado Pago')
     },
   })
 
@@ -55,5 +78,7 @@ export function useMercadoPago() {
     conectar,
     desconectar: desconectarMutation.mutate,
     isDesconectando: desconectarMutation.isPending,
+    sincronizar: sincronizarMutation.mutate,
+    isSincronizando: sincronizarMutation.isPending,
   }
 }
