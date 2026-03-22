@@ -1,4 +1,4 @@
-import { User, Shield, Monitor } from 'lucide-react'
+import { User, Shield, Monitor, Plug } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,13 @@ import { useUIStore } from '@/stores/ui.store'
 import { PerfilSection } from './PerfilSection'
 import { SeguridadSection } from './SeguridadSection'
 import { SesionesSection } from './SesionesSection'
+import { IntegracionesSection } from './IntegracionesSection'
 
 const tabs = [
   { value: 'perfil', label: 'Perfil', icon: User },
   { value: 'seguridad', label: 'Seguridad', icon: Shield },
   { value: 'sesiones', label: 'Sesiones', icon: Monitor },
+  { value: 'integraciones', label: 'Integraciones', icon: Plug },
 ] as const
 
 export function ConfiguracionDialog() {
@@ -47,6 +49,9 @@ export function ConfiguracionDialog() {
           <TabsContent value="sesiones" className="overflow-y-auto p-4 flex-1">
             <SesionesSection />
           </TabsContent>
+          <TabsContent value="integraciones" className="overflow-y-auto p-4 flex-1">
+            <IntegracionesSection />
+          </TabsContent>
         </Tabs>
 
         {/* Desktop: tabs verticales lateral */}
@@ -73,6 +78,9 @@ export function ConfiguracionDialog() {
           </TabsContent>
           <TabsContent value="sesiones" className="overflow-y-auto p-6">
             <SesionesSection />
+          </TabsContent>
+          <TabsContent value="integraciones" className="overflow-y-auto p-6">
+            <IntegracionesSection />
           </TabsContent>
         </Tabs>
       </DialogContent>
