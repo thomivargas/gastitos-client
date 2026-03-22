@@ -21,7 +21,6 @@ const PAGE_TITLES: Record<string, string> = {
   '/categorias': 'Categorias',
   '/transacciones': 'Transacciones',
   '/transferencias': 'Transferencias',
-  '/presupuestos': 'Presupuestos',
   '/reportes': 'Reportes',
   '/recurrentes': 'Recurrentes',
   '/moneda': 'Moneda',
@@ -33,7 +32,6 @@ const PAGE_TITLES: Record<string, string> = {
 function getPageTitle(pathname: string): string | null {
   if (PAGE_TITLES[pathname]) return PAGE_TITLES[pathname]
   if (pathname.startsWith('/cuentas/')) return 'Detalle de cuenta'
-  if (pathname.startsWith('/presupuestos/')) return 'Detalle de presupuesto'
   return null
 }
 

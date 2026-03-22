@@ -4,6 +4,7 @@ import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { GlobalFetchingIndicator } from './GlobalFetchingIndicator'
 import { ConfiguracionDialog } from '@/components/configuracion/ConfiguracionDialog'
+import { MonedaModal } from '@/components/moneda/MonedaModal'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { useUIStore } from '@/stores/ui.store'
 
@@ -25,6 +26,7 @@ export function AppLayout() {
         {/* Mobile sidebar — Sheet overlay */}
         <MobileNav />
         <ConfiguracionDialog />
+        <MonedaModal />
 
         {/* Main content */}
         <div className="flex-1 flex flex-col min-w-0">

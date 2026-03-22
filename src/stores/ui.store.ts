@@ -2,12 +2,13 @@ import { create } from 'zustand'
 
 type Theme = 'light' | 'dark' | 'system'
 type Moneda = 'ARS' | 'USD'
-type TipoDolar = 'blue' | 'mep' | 'oficial'
+type TipoDolar = 'blue' | 'mep' | 'oficial' | 'tarjeta'
 
 interface UIState {
   sidebarOpen: boolean
   sidebarCollapsed: boolean
   configuracionOpen: boolean
+  monedaModalOpen: boolean
   theme: Theme
   monedaDisplay: Moneda
   tipoDolar: TipoDolar
@@ -16,6 +17,7 @@ interface UIState {
   setSidebarOpen: (open: boolean) => void
   toggleSidebarCollapsed: () => void
   setConfiguracionOpen: (open: boolean) => void
+  setMonedaModalOpen: (open: boolean) => void
   setTheme: (theme: Theme) => void
   setMonedaDisplay: (moneda: Moneda) => void
   setTipoDolar: (tipo: TipoDolar) => void
@@ -25,6 +27,7 @@ export const useUIStore = create<UIState>((set) => ({
   sidebarOpen: false,
   sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
   configuracionOpen: false,
+  monedaModalOpen: false,
   theme: (localStorage.getItem('theme') as Theme) || 'system',
   monedaDisplay: (localStorage.getItem('monedaDisplay') as Moneda) || 'ARS',
   tipoDolar: (localStorage.getItem('tipoDolar') as TipoDolar) || 'blue',
@@ -37,6 +40,7 @@ export const useUIStore = create<UIState>((set) => ({
     return { sidebarCollapsed: next }
   }),
   setConfiguracionOpen: (open) => set({ configuracionOpen: open }),
+  setMonedaModalOpen: (open) => set({ monedaModalOpen: open }),
   setTheme: (theme) => {
     localStorage.setItem('theme', theme)
     applyTheme(theme)

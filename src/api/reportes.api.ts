@@ -122,11 +122,3 @@ export async function exportar(params?: { cuentaId?: string; fechaDesde?: string
 
   descargarBlob(res.data, 'gastitos-export.csv')
 }
-
-export async function descargarPlantilla() {
-  const res = await apiClient.get('/reportes/plantilla', {
-    responseType: 'blob',
-  })
-
-  descargarBlob(res.data, 'gastitos-plantilla.csv')
-}

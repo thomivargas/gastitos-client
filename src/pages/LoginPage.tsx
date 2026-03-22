@@ -3,12 +3,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { Eye, EyeOff, ArrowRight, PiggyBank } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AuthLayout } from '@/components/auth/AuthLayout'
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { useLogin } from '@/hooks/use-auth'
+import logo from '@/assets/logo_con_texto_r.png'
 
 const loginSchema = z.object({
   email: z.string().email('Email invalido'),
@@ -34,11 +36,9 @@ export default function LoginPage() {
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2.5 mb-6 lg:hidden">
-            <div className="p-2 rounded-xl bg-emerald-500/10">
-              <PiggyBank className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Gastitos</span>
+          {/* Logo mobile */}
+          <div className="flex items-center mb-12 lg:hidden justify-center mr-4">
+            <img src={logo} alt="Gastitos" width={200} className="object-contain dark:brightness-[10] dark:saturate-0" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h2>
           <p className="text-muted-foreground">
@@ -59,7 +59,7 @@ export default function LoginPage() {
               {...register('email')}
               autoComplete="email"
               autoFocus
-              className="h-11 bg-muted/50 border-transparent focus:border-emerald-500/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
+              className="h-11 bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
             />
             {errors.email && (
               <p className="text-xs text-destructive mt-1 animate-slide-up-fade">{errors.email.message}</p>
@@ -77,7 +77,7 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 {...register('password')}
                 autoComplete="current-password"
-                className="h-11 pr-11 bg-muted/50 border-transparent focus:border-emerald-500/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
+                className="h-11 pr-11 bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
               />
               <button
                 type="button"
@@ -96,7 +96,7 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-all duration-200 hover:shadow-lg hover:shadow-emerald-600/20 active:scale-[0.98]"
+            className="w-full h-11 font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
             disabled={login.isPending}
           >
             {login.isPending ? (
@@ -114,18 +114,20 @@ export default function LoginPage() {
         </form>
 
         {/* Separador */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border/60" />
-          </div>
+        <div className="relative flex items-center">
+          <div className="flex-1 border-t border-border/60" />
+          <span className="mx-3 text-xs text-muted-foreground/50">o</span>
+          <div className="flex-1 border-t border-border/60" />
         </div>
+
+        <GoogleAuthButton />
 
         {/* Link a registro */}
         <p className="text-center text-sm text-muted-foreground">
           No tenes cuenta?{' '}
           <Link
             to="/registro"
-            className="text-emerald-600 dark:text-emerald-400 font-medium hover:text-emerald-700 dark:hover:text-emerald-300 underline-offset-4 hover:underline transition-colors"
+            className="text-primary font-medium hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
           >
             Crea una gratis
           </Link>

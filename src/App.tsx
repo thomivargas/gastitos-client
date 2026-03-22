@@ -11,17 +11,15 @@ import { Spinner } from '@/components/ui/spinner'
 // Pages
 const LoginPage = lazy(() => import('@/pages/LoginPage'))
 const RegistroPage = lazy(() => import('@/pages/RegistroPage'))
+const GoogleExitoPage = lazy(() => import('@/pages/GoogleExitoPage'))
 const DashboardPage = lazy(() => import('@/pages/DashboardPage'))
 const CuentasPage = lazy(() => import('@/pages/CuentasPage'))
 const CuentaDetallePage = lazy(() => import('@/pages/CuentaDetallePage'))
 const CategoriasPage = lazy(() => import('@/pages/CategoriasPage'))
 const TransaccionesPage = lazy(() => import('@/pages/TransaccionesPage'))
 const TransferenciasPage = lazy(() => import('@/pages/TransferenciasPage'))
-const PresupuestosPage = lazy(() => import('@/pages/PresupuestosPage'))
-const PresupuestoDetallePage = lazy(() => import('@/pages/PresupuestoDetallePage'))
 const ReportesPage = lazy(() => import('@/pages/ReportesPage'))
 const RecurrentesPage = lazy(() => import('@/pages/RecurrentesPage'))
-const MonedaPage = lazy(() => import('@/pages/MonedaPage'))
 const ImportacionPage = lazy(() => import('@/pages/ImportacionPage'))
 const ReglasPage = lazy(() => import('@/pages/ReglasPage'))
 
@@ -50,6 +48,7 @@ export default function App() {
             {/* Rutas publicas */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegistroPage />} />
+            <Route path="/auth/google/exito" element={<GoogleExitoPage />} />
 
             {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
@@ -60,11 +59,8 @@ export default function App() {
                 <Route path="/categorias" element={<CategoriasPage />} />
                 <Route path="/transacciones" element={<TransaccionesPage />} />
                 <Route path="/transferencias" element={<TransferenciasPage />} />
-                <Route path="/presupuestos" element={<PresupuestosPage />} />
-                <Route path="/presupuestos/:id" element={<PresupuestoDetallePage />} />
                 <Route path="/reportes" element={<ReportesPage />} />
                 <Route path="/recurrentes" element={<RecurrentesPage />} />
-                <Route path="/moneda" element={<MonedaPage />} />
                 <Route path="/importar" element={<ImportacionPage />} />
                 <Route path="/reglas" element={<ReglasPage />} />
               </Route>

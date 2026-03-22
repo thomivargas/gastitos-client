@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import type React from 'react'
 import { NavLink } from 'react-router'
 import {
   LayoutDashboard,
@@ -6,20 +7,24 @@ import {
   Tags,
   ArrowLeftRight,
   ArrowRightLeft,
-  PieChart,
   BarChart3,
   Repeat,
   DollarSign,
   Upload,
   Sparkles,
   Settings,
-  PiggyBank,
 } from 'lucide-react'
+import logoConTexto from '@/assets/logo_con_texto_r.png'
+import logo from '@/assets/logo.png'
 import { cn } from '@/lib/utils'
 import { useUIStore } from '@/stores/ui.store'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
-const navGroups = [
+type NavItem =
+  | { to: string; label: string; icon: React.ElementType; modal?: never }
+  | { modal: string; label: string; icon: React.ElementType; to?: never }
+
+const navGroups: { label?: string; items: NavItem[] }[] = [
   {
     items: [
       { to: '/', label: 'Inicio', icon: LayoutDashboard },
@@ -37,7 +42,6 @@ const navGroups = [
   {
     label: 'Planificacion',
     items: [
-      { to: '/presupuestos', label: 'Presupuestos', icon: PieChart },
       { to: '/reportes', label: 'Reportes', icon: BarChart3 },
       { to: '/recurrentes', label: 'Recurrentes', icon: Repeat },
     ],
@@ -45,7 +49,7 @@ const navGroups = [
   {
     label: 'Herramientas',
     items: [
-      { to: '/moneda', label: 'Moneda', icon: DollarSign },
+      { modal: 'moneda', label: 'Moneda', icon: DollarSign },
       { to: '/importar', label: 'Importar', icon: Upload },
       { to: '/reglas', label: 'Reglas', icon: Sparkles },
     ],
@@ -61,6 +65,7 @@ interface SidebarProps {
 
 export const Sidebar = memo(function Sidebar({ className, forceExpanded }: SidebarProps) {
   const setConfiguracionOpen = useUIStore((s) => s.setConfiguracionOpen)
+  const setMonedaModalOpen = useUIStore((s) => s.setMonedaModalOpen)
   const setSidebarOpen = useUIStore((s) => s.setSidebarOpen)
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
 
@@ -71,10 +76,12 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
       {/* Logo */}
       <div className={cn(
         'flex items-center h-14 border-b border-sidebar-border shrink-0',
-        collapsed ? 'justify-center px-0' : 'gap-2 px-4'
+        collapsed && 'justify-center px-0'
       )}>
-        <PiggyBank className="h-5 w-5 text-primary shrink-0" />
-        {!collapsed && <span className="text-lg font-bold truncate">Gastitos</span>}
+        {collapsed
+          ? <img src={logo} alt="Gastitos" className="h-7 w-7 object-contain" />
+          : <img src={logoConTexto} width={100} alt="Gastitos" className="pl-3 object-contain" />
+        }
       </div>
 
       {/* Nav */}
@@ -90,25 +97,37 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
               <div className="h-px bg-sidebar-border mx-1 mb-2" />
             )}
             <ul className="space-y-0.5">
-              {group.items.map(({ to, label, icon: Icon }) => (
-                <li key={to}>
+              {group.items.map((item) => {
+                const { label, icon: Icon } = item
+                const key = item.to ?? item.modal ?? label
+                const handleClick = item.modal === 'moneda'
+                  ? () => { setMonedaModalOpen(true); setSidebarOpen(false) }
+                  : undefined
+
+                return (
+                <li key={key}>
                   {collapsed ? (
                     <Tooltip>
                       <TooltipTrigger
-                        render={
-                          <NavLink
-                            to={to}
-                            end={to === '/'}
-                            className={({ isActive }) =>
-                              cn(
-                                'flex items-center justify-center rounded-md p-2 transition-all duration-150',
-                                isActive
-                                  ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                  : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
-                              )
+                        {...(handleClick
+                          ? { onClick: handleClick, className: cn('flex w-full items-center justify-center rounded-md p-2 transition-all duration-150 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground') }
+                          : {
+                              render: (
+                                <NavLink
+                                  to={item.to!}
+                                  end={item.to === '/'}
+                                  className={({ isActive }) =>
+                                    cn(
+                                      'flex items-center justify-center rounded-md p-2 transition-all duration-150',
+                                      isActive
+                                        ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                        : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
+                                    )
+                                  }
+                                />
+                              ),
                             }
-                          />
-                        }
+                        )}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
                       </TooltipTrigger>
@@ -116,10 +135,18 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
                         {label}
                       </TooltipContent>
                     </Tooltip>
+                  ) : handleClick ? (
+                    <button
+                      onClick={handleClick}
+                      className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150 text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground hover:translate-x-0.5"
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      {label}
+                    </button>
                   ) : (
                     <NavLink
-                      to={to}
-                      end={to === '/'}
+                      to={item.to!}
+                      end={item.to === '/'}
                       className={({ isActive }) =>
                         cn(
                           'flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150',
@@ -134,7 +161,8 @@ export const Sidebar = memo(function Sidebar({ className, forceExpanded }: Sideb
                     </NavLink>
                   )}
                 </li>
-              ))}
+                )
+              })}
             </ul>
           </div>
         ))}

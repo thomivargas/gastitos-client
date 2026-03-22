@@ -4,27 +4,63 @@ import * as api from '@/api/categorias.api'
 import type { ClasificacionCategoria, Categoria } from '@/types'
 import { extractApiError } from '@/lib/utils'
 
-// ─── Cache helpers (lista simple) ────────────────────────
+// ─── Cache helpers ────────────────────────────────────────
 
 function agregarEnCacheLista(qc: QueryClient, item: Categoria) {
-  // Solo agregar al cache de la clasificacion correcta
-  qc.setQueryData<Categoria[]>(
-    ['categorias', item.clasificacion],
-    (old) => Array.isArray(old) ? [item, ...old] : [item],
-  )
+  if (item.padreId) {
+    // Es subcategoria: insertar dentro del padre en cache
+    qc.setQueryData<Categoria[]>(
+      ['categorias', item.clasificacion],
+      (old) => {
+        if (!Array.isArray(old)) return old
+        return old.map((cat) =>
+          cat.id === item.padreId
+            ? { ...cat, subcategorias: [...(cat.subcategorias ?? []), item] }
+            : cat,
+        )
+      },
+    )
+  } else {
+    // Es categoria raiz
+    qc.setQueryData<Categoria[]>(
+      ['categorias', item.clasificacion],
+      (old) => Array.isArray(old) ? [item, ...old] : [item],
+    )
+  }
 }
 
 function actualizarEnCacheLista(qc: QueryClient, item: Categoria) {
   qc.setQueriesData<Categoria[]>(
     { queryKey: ['categorias'], exact: false },
-    (old) => Array.isArray(old) ? old.map((i) => (i.id === item.id ? item : i)) : old,
+    (old) => {
+      if (!Array.isArray(old)) return old
+      return old.map((cat) => {
+        if (cat.id === item.id) return { ...cat, ...item }
+        if (cat.subcategorias) {
+          return {
+            ...cat,
+            subcategorias: cat.subcategorias.map((s) => s.id === item.id ? { ...s, ...item } : s),
+          }
+        }
+        return cat
+      })
+    },
   )
 }
 
 function removerDeCacheLista(qc: QueryClient, id: string) {
   qc.setQueriesData<Categoria[]>(
     { queryKey: ['categorias'], exact: false },
-    (old) => Array.isArray(old) ? old.filter((i) => i.id !== id) : old,
+    (old) => {
+      if (!Array.isArray(old)) return old
+      const sinPadre = old.filter((i) => i.id !== id)
+      // Si no estaba en el top level, buscar en subcategorias
+      if (sinPadre.length !== old.length) return sinPadre
+      return old.map((cat) => ({
+        ...cat,
+        subcategorias: cat.subcategorias?.filter((s) => s.id !== id),
+      }))
+    },
   )
 }
 

@@ -96,24 +96,6 @@ export interface Transferencia {
   creadoEl: string
 }
 
-export interface Presupuesto {
-  id: string
-  fechaInicio: string
-  fechaFin: string
-  gastoPresupuestado: number | null
-  ingresoEsperado: number | null
-  moneda: string
-  categorias: PresupuestoCategoria[]
-  creadoEl: string
-}
-
-export interface PresupuestoCategoria {
-  id: string
-  categoriaId: string
-  categoria?: { id: string; nombre: string; color: string; icono: string }
-  montoPresupuestado: number
-}
-
 export interface TransaccionRecurrente {
   id: string
   cuentaId: string

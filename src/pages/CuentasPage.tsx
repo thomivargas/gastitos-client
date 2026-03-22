@@ -74,7 +74,7 @@ export default function CuentasPage() {
   const [institucionFormOpen, setInstitucionFormOpen] = useState(false)
   const [editInstitucion, setEditInstitucion] = useState<Institucion | null>(null)
 
-  const { data: cuentasActivas } = useCuentas({ estado: 'ACTIVA', limit: 100 })
+  const { data: cuentasActivas, isLoading } = useCuentas({ estado: 'ACTIVA', limit: 100 })
 
   const gruposActivos = useMemo(
     () => agruparPorInstitucion(cuentasActivas?.data ?? []),
@@ -131,7 +131,27 @@ export default function CuentasPage() {
       <ResumenCuentas />
 
       {/* Cuentas agrupadas por tipo de institución */}
-      {gruposPorTipo.length === 0 ? (
+      {isLoading ? (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {Array.from({ length: 2 }).map((_, i) => (
+            <div key={i} className="space-y-2.5">
+              <div className="h-4 w-24 rounded shimmer" />
+              <div className="rounded-xl border border-border overflow-hidden">
+                {Array.from({ length: 2 }).map((_, j) => (
+                  <div key={j} className="flex items-center gap-3 p-3 border-b border-border last:border-0">
+                    <div className="h-8 w-8 rounded-lg shimmer shrink-0" />
+                    <div className="flex-1 space-y-1.5">
+                      <div className="h-3 w-28 rounded shimmer" />
+                      <div className="h-2.5 w-16 rounded shimmer" />
+                    </div>
+                    <div className="h-4 w-20 rounded shimmer" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : gruposPorTipo.length === 0 ? (
         <div className="py-14 text-center">
           <p className="text-sm text-muted-foreground">No tenés cuentas aún.</p>
           <button

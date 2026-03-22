@@ -1,5 +1,5 @@
 import { useState, lazy, Suspense } from 'react'
-import { Download, FileSpreadsheet, TrendingUp, TrendingDown, Minus, Hash } from 'lucide-react'
+import { Download, TrendingUp, TrendingDown, Minus, Hash } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -79,10 +79,6 @@ export default function ReportesPage() {
     })
   }
 
-  function handlePlantilla() {
-    reportesApi.descargarPlantilla()
-  }
-
   return (
     <div className="space-y-6 page-transition">
 
@@ -90,15 +86,6 @@ export default function ReportesPage() {
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <h1 className="text-2xl font-bold tracking-tight">Reportes</h1>
         <div className="flex gap-2 shrink-0">
-          <button
-            onClick={handlePlantilla}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg
-              border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30
-              transition-colors duration-150"
-          >
-            <FileSpreadsheet className="h-3.5 w-3.5" />
-            <span className="hidden sm:inline">Plantilla</span>
-          </button>
           <button
             onClick={handleExportar}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg

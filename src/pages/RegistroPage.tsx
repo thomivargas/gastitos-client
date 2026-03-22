@@ -3,12 +3,14 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link } from 'react-router'
-import { Eye, EyeOff, ArrowRight, PiggyBank, Check, Circle } from 'lucide-react'
+import { Eye, EyeOff, ArrowRight, Check, Circle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { AuthLayout } from '@/components/auth/AuthLayout'
+import { GoogleAuthButton } from '@/components/auth/GoogleAuthButton'
 import { useRegistro } from '@/hooks/use-auth'
+import logo from '@/assets/logo_con_texto_r.png'
 
 const registroSchema = z.object({
   nombre: z.string().min(2, 'Minimo 2 caracteres').max(100),
@@ -49,15 +51,13 @@ export default function RegistroPage() {
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-2">
-          <div className="flex items-center gap-2.5 mb-6 lg:hidden">
-            <div className="p-2 rounded-xl bg-emerald-500/10">
-              <PiggyBank className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight">Gastitos</span>
+          {/* Logo mobile */}
+          <div className="flex items-center mb-12 lg:hidden justify-center mr-4">
+            <img src={logo} alt="Gastitos" width={200} className="object-contain dark:brightness-[10] dark:saturate-0" />
           </div>
-          <h2 className="text-2xl font-bold tracking-tight">Crea tu cuenta</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Bienvenido de vuelta</h2>
           <p className="text-muted-foreground">
-            Empeza a controlar tus finanzas en minutos
+            Ingresa tus credenciales para continuar
           </p>
         </div>
 
@@ -74,7 +74,7 @@ export default function RegistroPage() {
               {...register('nombre')}
               autoComplete="name"
               autoFocus
-              className="h-11 bg-muted/50 border-transparent focus:border-emerald-500/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
+              className="h-11 bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
             />
             {errors.nombre && (
               <p className="text-xs text-destructive mt-1 animate-slide-up-fade">{errors.nombre.message}</p>
@@ -91,7 +91,7 @@ export default function RegistroPage() {
               placeholder="tu@email.com"
               {...register('email')}
               autoComplete="email"
-              className="h-11 bg-muted/50 border-transparent focus:border-emerald-500/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
+              className="h-11 bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
             />
             {errors.email && (
               <p className="text-xs text-destructive mt-1 animate-slide-up-fade">{errors.email.message}</p>
@@ -109,7 +109,7 @@ export default function RegistroPage() {
                 placeholder="••••••••"
                 {...register('password')}
                 autoComplete="new-password"
-                className="h-11 pr-11 bg-muted/50 border-transparent focus:border-emerald-500/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
+                className="h-11 pr-11 bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all duration-200 placeholder:text-muted-foreground/50"
               />
               <button
                 type="button"
@@ -122,25 +122,22 @@ export default function RegistroPage() {
               </button>
             </div>
 
-            {/* Indicador de fuerza mejorado */}
+            {/* Indicador de fuerza */}
             {password.length > 0 && (
               <div className="space-y-2.5 pt-2 animate-slide-up-fade">
-                {/* Barra de progreso continua */}
                 <div className="h-1 w-full bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500 ease-out"
                     style={{
                       width: `${strengthPercent}%`,
                       backgroundColor: strengthPercent < 50
-                        ? 'oklch(0.65 0.2 25)'
+                        ? 'oklch(0.58 0.22 27)'
                         : strengthPercent < 100
-                          ? 'oklch(0.75 0.15 85)'
-                          : 'oklch(0.65 0.2 145)',
+                          ? 'oklch(0.72 0.15 55)'
+                          : 'oklch(0.65 0.20 38)',
                     }}
                   />
                 </div>
-
-                {/* Checklist */}
                 <div className="flex flex-wrap gap-x-4 gap-y-1">
                   {PASSWORD_RULES.map((rule, i) => {
                     const passed = rule.test(password)
@@ -148,7 +145,7 @@ export default function RegistroPage() {
                       <span
                         key={i}
                         className={`flex items-center gap-1.5 text-xs transition-colors duration-200 ${
-                          passed ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground/60'
+                          passed ? 'text-primary' : 'text-muted-foreground/60'
                         }`}
                       >
                         {passed ? (
@@ -167,7 +164,7 @@ export default function RegistroPage() {
 
           <Button
             type="submit"
-            className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 text-white font-medium transition-all duration-200 hover:shadow-lg hover:shadow-emerald-600/20 active:scale-[0.98]"
+            className="w-full h-11 font-medium transition-all duration-200 hover:shadow-lg hover:shadow-primary/20 active:scale-[0.98]"
             disabled={registro.isPending}
           >
             {registro.isPending ? (
@@ -185,18 +182,20 @@ export default function RegistroPage() {
         </form>
 
         {/* Separador */}
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border/60" />
-          </div>
+        <div className="relative flex items-center">
+          <div className="flex-1 border-t border-border/60" />
+          <span className="mx-3 text-xs text-muted-foreground/50">o</span>
+          <div className="flex-1 border-t border-border/60" />
         </div>
+
+        <GoogleAuthButton />
 
         {/* Link a login */}
         <p className="text-center text-sm text-muted-foreground">
           Ya tenes cuenta?{' '}
           <Link
             to="/login"
-            className="text-emerald-600 dark:text-emerald-400 font-medium hover:text-emerald-700 dark:hover:text-emerald-300 underline-offset-4 hover:underline transition-colors"
+            className="text-primary font-medium hover:text-primary/80 underline-offset-4 hover:underline transition-colors"
           >
             Inicia sesion
           </Link>

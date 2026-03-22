@@ -55,7 +55,6 @@ function removerDeCache(qc: QueryClient, id: string) {
 function invalidarDerivadas(qc: QueryClient) {
   qc.invalidateQueries({ queryKey: ['cuentas'] })
   qc.invalidateQueries({ queryKey: ['reportes'] })
-  qc.invalidateQueries({ queryKey: ['presupuestos'] })
 }
 
 // ─── Queries ─────────────────────────────────────────────
