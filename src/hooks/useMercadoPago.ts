@@ -37,11 +37,15 @@ export function useMercadoPago() {
     },
   })
 
-  function conectar(cuentaId: string) {
-    // VITE_API_URL ya incluye /api (ej: http://localhost:3000/api)
-    // Se remueve el sufijo /api para obtener la URL base del servidor
-    const base = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/api$/, '') ?? 'http://localhost:3000'
-    window.location.href = `${base}/api/mercadopago/conectar?cuentaId=${cuentaId}`
+  async function conectar(cuentaId: string) {
+    try {
+      const { data } = await apiClient.get<{ status: string; data: { url: string } }>(
+        `/mercadopago/conectar?cuentaId=${cuentaId}`,
+      )
+      window.location.href = data.data.url
+    } catch {
+      toast.error('No se pudo iniciar la conexión con Mercado Pago')
+    }
   }
 
   return {
