@@ -22,6 +22,7 @@ const ReportesPage = lazy(() => import('@/pages/ReportesPage'))
 const RecurrentesPage = lazy(() => import('@/pages/RecurrentesPage'))
 const ImportacionPage = lazy(() => import('@/pages/ImportacionPage'))
 const ReglasPage = lazy(() => import('@/pages/ReglasPage'))
+const MpCallbackPage = lazy(() => import('@/pages/MpCallbackPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/registro" element={<RegistroPage />} />
             <Route path="/auth/google/exito" element={<GoogleExitoPage />} />
+            <Route path="/mp/callback" element={<MpCallbackPage />} />
 
             {/* Rutas protegidas */}
             <Route element={<ProtectedRoute />}>
